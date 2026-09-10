@@ -4,6 +4,68 @@
   const analyticsId = "G-77H71FC77X";
   const consentKey = "csi-cookie-consent";
 
+  function initializePrimaryNav() {
+    if (document.getElementById("csi-primary-nav")) return;
+    const style = document.createElement("style");
+    style.textContent = `
+      [data-aid="HEADER_NAV_RENDERED"], [data-aid="HAMBURGER_MENU_LINK"], [id$="-navId-mobile"] { display:none !important; }
+      #csi-primary-nav{position:relative;z-index:1000;background:#080808;color:#fff;border-bottom:2px solid #a00;font-family:Montserrat,Arial,sans-serif}
+      #csi-primary-nav *{box-sizing:border-box}
+      .csi-nav-shell{max-width:1180px;margin:auto;padding:12px 20px;display:flex;align-items:center;gap:24px}
+      .csi-nav-brand{color:#fff;text-decoration:none;font-weight:800;letter-spacing:.04em;font-size:15px;white-space:nowrap}
+      .csi-nav-links{margin-left:auto;display:flex;align-items:center;gap:6px}
+      .csi-nav-links a,.csi-nav-links summary{color:#fff;text-decoration:none;padding:11px 10px;font-size:13px;font-weight:700;letter-spacing:.035em;cursor:pointer;list-style:none}
+      .csi-nav-links summary::-webkit-details-marker{display:none}
+      .csi-nav-links details{position:relative}
+      .csi-nav-links details[open]>summary,.csi-nav-links a:hover,.csi-nav-links summary:hover{color:#ff5a5a}
+      .csi-nav-menu{position:absolute;top:100%;left:0;min-width:260px;padding:8px;background:#111;border:1px solid #333;box-shadow:0 12px 30px rgba(0,0,0,.35);display:grid}
+      .csi-nav-menu a{padding:9px 12px;font-size:12px}
+      .csi-nav-contact{border:1px solid #c22;border-radius:999px}
+      .csi-nav-toggle{display:none;margin-left:auto;background:transparent;color:#fff;border:1px solid #777;border-radius:4px;padding:8px 11px;font:700 13px Montserrat,Arial,sans-serif}
+      @media(max-width:900px){
+        .csi-nav-shell{flex-wrap:wrap;gap:10px}.csi-nav-toggle{display:block}.csi-nav-links{display:none;width:100%;margin:0;align-items:stretch;flex-direction:column;padding:8px 0}.csi-nav-links[data-open="true"]{display:flex}
+        .csi-nav-links a,.csi-nav-links summary{display:block;padding:11px 4px}.csi-nav-menu{position:static;box-shadow:none;border:0;border-left:2px solid #a00;margin:0 0 6px 8px;background:#111}
+      }
+    `;
+    document.head.appendChild(style);
+    const nav = document.createElement("nav");
+    nav.id = "csi-primary-nav";
+    nav.setAttribute("aria-label", "Primary navigation");
+    nav.innerHTML = `
+      <div class="csi-nav-shell">
+        <a class="csi-nav-brand" href="/">CSI: CLEAN SCENE INVESTIGATORS</a>
+        <button class="csi-nav-toggle" type="button" aria-expanded="false" aria-controls="csi-nav-links">MENU</button>
+        <div class="csi-nav-links" id="csi-nav-links">
+          <a href="/">HOME</a>
+          <details><summary>SERVICES</summary><div class="csi-nav-menu">
+            <a href="/crime-scene-cleaning-dfw">Crime Scene Cleanup</a><a href="/biohazard-cleanup-in-dfw">Trauma &amp; Biohazard Cleanup</a><a href="/blood-cleanup-dallas-tx">Blood Cleanup</a><a href="/unattended-death-cleanup">Unattended Death Cleanup</a><a href="/decomposition-cleanup-dfw">Decomposition Cleanup</a><a href="/hoarding-cleanup-in-texas">Hoarding Cleanup</a><a href="/advanced-odor-removal-dfw">Odor Removal</a><a href="/vehicle-biohazard-dfw-tx">Vehicle Biohazard Cleanup</a>
+          </div></details>
+          <details><summary>RESOURCES</summary><div class="csi-nav-menu">
+            <a href="/what-to-do-after-a-scene">What To Do After a Scene</a><a href="/professional-referrals">Professional Referrals</a><a href="/property-manager/landlord-1">Property Managers</a><a href="/insurance-%26-payment-help">Insurance &amp; Payment Help</a><a href="/safety-and-compliance">Safety &amp; Compliance</a><a href="/follow-us">Blog &amp; Socials</a>
+          </div></details>
+          <a href="/service-areas-in-texas">SERVICE AREAS</a>
+          <a href="/about-us">ABOUT US</a>
+          <a class="csi-nav-contact" href="/contact-us">CONTACT US</a>
+        </div>
+      </div>`;
+    document.body.prepend(nav);
+    const toggle = nav.querySelector(".csi-nav-toggle");
+    const links = nav.querySelector(".csi-nav-links");
+    toggle.addEventListener("click", () => {
+      const open = toggle.getAttribute("aria-expanded") !== "true";
+      toggle.setAttribute("aria-expanded", String(open));
+      links.dataset.open = String(open);
+    });
+    nav.querySelectorAll("details").forEach((details) => {
+      details.addEventListener("toggle", () => {
+        if (!details.open) return;
+        nav.querySelectorAll("details[open]").forEach((other) => {
+          if (other !== details) other.open = false;
+        });
+      });
+    });
+  }
+
   function setExpanded(control, panel, expanded) {
     control.setAttribute("aria-expanded", String(expanded));
     panel.hidden = !expanded;
@@ -111,6 +173,7 @@
   }
 
   function initialize() {
+    initializePrimaryNav();
     initializeStaticContent();
     initializeNavigation();
     initializeCookieConsent();
