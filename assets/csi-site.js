@@ -9,7 +9,7 @@
     const style = document.createElement("style");
     style.textContent = `
       [data-aid="HEADER_NAV_RENDERED"], [data-aid="HAMBURGER_MENU_LINK"], [id$="-navId-mobile"] { display:none !important; }
-      #csi-primary-nav{position:relative;z-index:1000;background:#080808;color:#fff;border-bottom:2px solid #a00;font-family:Montserrat,Arial,sans-serif}
+      #csi-primary-nav{position:relative;z-index:1000;background:#080808;color:#fff;border-bottom:2px solid #d8b54a;font-family:Montserrat,Arial,sans-serif}
       #csi-primary-nav *{box-sizing:border-box}
       .csi-nav-shell{max-width:1180px;margin:auto;padding:12px 20px;display:flex;align-items:center;gap:24px}
       .csi-nav-brand{color:#fff;text-decoration:none;font-weight:800;letter-spacing:.04em;font-size:15px;white-space:nowrap}
