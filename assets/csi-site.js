@@ -172,9 +172,66 @@
     });
   }
 
+  function decodeMigratedNumericEntities(value) {
+    if (!value || !/&#(?:x[0-9a-f]+|\d+);/i.test(value)) return value;
+    const decoder = document.createElement("textarea");
+    let decoded = value;
+    for (let pass = 0; pass < 3 && /&#(?:x[0-9a-f]+|\d+);/i.test(decoded); pass += 1) {
+      decoder.innerHTML = decoded;
+      const next = decoder.value;
+      if (next === decoded) break;
+      decoded = next;
+    }
+    return decoded;
+  }
+
+  function initializeBlogFormatting() {
+    if (!window.location.pathname.startsWith("/follow-us")) return;
+
+    const root = document.querySelector("main") || document.body;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        const value = node.nodeValue || "";
+        const parent = node.parentElement;
+        if (!parent || ["SCRIPT", "STYLE", "NOSCRIPT", "TEXTAREA"].includes(parent.tagName)) {
+          return NodeFilter.FILTER_REJECT;
+        }
+        return /&#(?:x[0-9a-f]+|\d+);/i.test(value)
+          ? NodeFilter.FILTER_ACCEPT
+          : NodeFilter.FILTER_SKIP;
+      }
+    });
+
+    const affectedNodes = [];
+    while (walker.nextNode()) affectedNodes.push(walker.currentNode);
+    affectedNodes.forEach((node) => {
+      node.nodeValue = decodeMigratedNumericEntities(node.nodeValue || "");
+    });
+
+    const archive = document.querySelector(".csi-blog-archive");
+    if (!archive) return;
+
+    const titleCorrections = new Map([
+      [
+        "/follow-us/f/247-crime-scene-biohazard-cleanup-in-dfw-%7C-csi-clean-scene-in",
+        "24/7 Crime Scene & Biohazard Cleanup in DFW | CSI: Clean Scene Investigators"
+      ],
+      [
+        "/follow-us/f/when-clean-means-more-the-reality-behind-trauma-biohazard-clea",
+        "When Clean Means More: The Reality Behind Trauma & Biohazard Cleanup"
+      ]
+    ]);
+
+    archive.querySelectorAll(".csi-blog-card h3 a[href]").forEach((link) => {
+      const correctedTitle = titleCorrections.get(link.getAttribute("href"));
+      if (correctedTitle) link.textContent = correctedTitle;
+    });
+  }
+
   function initialize() {
     initializePrimaryNav();
     initializeStaticContent();
+    initializeBlogFormatting();
     initializeNavigation();
     initializeCookieConsent();
   }
