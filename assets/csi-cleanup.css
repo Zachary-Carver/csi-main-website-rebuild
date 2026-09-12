@@ -70,6 +70,23 @@ body {
   }
 }
 
+/* Raise intentionally tiny migrated labels/links to readable sizes without changing hierarchy. */
+.csi-black-founder__portrait::after {
+  font-size: 11px !important;
+  max-width: 220px !important;
+  right: -8px !important;
+}
+
+.csi-black-founder__roles span,
+.csi-black-service-card__link,
+.csi-black-service-card__dual-links a,
+.csi-black-response__eyebrow,
+.csi-black-services__eyebrow,
+.csi-black-founder__eyebrow {
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+}
+
 /* Form readability and brand-consistent controls. */
 .csi-combined-contact__field input,
 .csi-combined-contact__field select,
@@ -183,6 +200,10 @@ body {
 
   .csi-combined-contact__button {
     width: 100%;
+  }
+
+  .csi-black-founder__portrait::after {
+    right: 8px !important;
   }
 }
 
