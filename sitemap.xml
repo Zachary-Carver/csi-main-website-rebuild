@@ -1,1 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><sitemap><loc>https://cleansceneinvestigators.com/sitemap.website.xml</loc></sitemap><sitemap><loc>https://cleansceneinvestigators.com/sitemap.blog.xml</loc></sitemap><sitemap><loc>https://cleansceneinvestigators.com/sitemap.ols.xml</loc></sitemap><sitemap><loc>https://cleansceneinvestigators.com/sitemap.ola.xml</loc></sitemap></sitemapindex>
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap><loc>https://cleansceneinvestigators.com/sitemap.website.xml</loc></sitemap>
+  <sitemap><loc>https://cleansceneinvestigators.com/sitemap.blog.xml</loc></sitemap>
+</sitemapindex>

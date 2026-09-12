@@ -1,3 +1,7 @@
+# CSI canonical and legacy redirects
+/home / 301
+/ols/products / 301
+/f/* /follow-us/f/:splat 301
 /grapevine-tx-response /service-areas-in-texas 301
 /safety-compliance /safety-and-compliance 301
 /farmers-branch-tx-response /farmers-branch-response 301
