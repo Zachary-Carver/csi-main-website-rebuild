@@ -1,4 +1,4 @@
-name: Deploy exact website copy to GitHub Pages
+name: Repair and deploy CSI website
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -15,22 +15,48 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  repair-and-deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Normalize migrated site source
+        run: python scripts/repair_site.py --write
+
+      - name: Persist normalized source to main
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No source normalization changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Normalize migrated site source"
+          git push origin HEAD:main
+
       - uses: actions/configure-pages@v5
-      - name: Prepare exact static site
+
+      - name: Prepare repaired static site
         shell: bash
         run: |
           mkdir -p _site
           rsync -a --exclude='.git' --exclude='.github' --exclude='_site' ./ _site/
+
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _site
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
