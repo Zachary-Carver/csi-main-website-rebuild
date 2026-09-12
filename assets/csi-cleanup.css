@@ -172,6 +172,19 @@ body {
   color: #ffffff !important;
 }
 
+.csi-turnstile-wrap {
+  margin: 18px 0 4px;
+  min-height: 65px;
+}
+
+.csi-turnstile-note {
+  margin: 8px 0 14px !important;
+  max-width: 64ch;
+  color: #d7d7d7 !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+}
+
 /* Improve small link rows and controls without changing the wording or typography hierarchy. */
 .widget-html [class*="__links"] a,
 .widget-html [class*="__actions"] a,

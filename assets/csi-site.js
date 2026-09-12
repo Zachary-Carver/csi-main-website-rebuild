@@ -212,6 +212,27 @@
     const status = document.getElementById("csi-contact-status");
     const submit = form.querySelector('button[type="submit"]');
     const defaultLabel = submit.textContent;
+    const turnstile = form.querySelector(".cf-turnstile");
+    if (turnstile) {
+      fetch("/api/turnstile-config", { headers: { Accept: "application/json" } })
+        .then((response) => response.ok ? response.json() : Promise.reject())
+        .then(({ siteKey }) => {
+          if (!siteKey) return;
+          turnstile.dataset.sitekey = siteKey;
+          if (!document.querySelector('script[data-csi-turnstile]')) {
+            const script = document.createElement("script");
+            script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+            script.async = true;
+            script.defer = true;
+            script.dataset.csiTurnstile = "true";
+            document.head.appendChild(script);
+          }
+        })
+        .catch(() => {
+          status.dataset.state = "error";
+          status.textContent = "Online security verification is temporarily unavailable. Please call 940-654-6334.";
+        });
+    }
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       if (!form.reportValidity()) return;
@@ -224,6 +245,7 @@
         const result = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(result.error || "We could not send your inquiry.");
         form.reset();
+        if (window.turnstile) window.turnstile.reset(turnstile);
         status.dataset.state = "success";
         status.textContent = "Your confidential inquiry was sent. CSI will contact you as soon as possible.";
       } catch (error) {

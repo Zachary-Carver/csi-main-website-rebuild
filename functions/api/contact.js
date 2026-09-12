@@ -1,6 +1,15 @@
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff"}});
 const allowed=new Set(["Crime Scene Cleanup","Trauma or Biohazard Cleanup","Blood or Bodily Fluid Cleanup","Unattended Death or Decomposition","Homicide or Suicide Cleanup","Hoarding or Extreme-Mess Cleanup","Advanced Odor Removal","Vehicle Biohazard Cleanup"]);
 const text=(v,n)=>typeof v==="string"?v.trim().slice(0,n):"";
+const attempts=new Map();
+const WINDOW_MS=10*60*1000;
+const MAX_ATTEMPTS=4;
+function limited(key,now=Date.now()){
+ const recent=(attempts.get(key)||[]).filter((value)=>now-value<WINDOW_MS);
+ recent.push(now); attempts.set(key,recent);
+ if(attempts.size>1000)for(const [candidate,times] of attempts)if(!times.some((value)=>now-value<WINDOW_MS))attempts.delete(candidate);
+ return recent.length>MAX_ATTEMPTS;
+}
 export async function onRequestPost({request,env}){
  try{
   const origin=request.headers.get("origin"); if(origin&&!/^https:\/\/(?:www\.)?(?:cleansceneinvestigators\.com|[a-z0-9-]+\.csi-main-website-rebuild\.pages\.dev)$/i.test(origin)) return json({error:"Request origin was not accepted."},403);
@@ -11,7 +20,10 @@ export async function onRequestPost({request,env}){
   const v={name:text(data.name,100),phone:text(data.phone,30),email:text(data.email,254),location:text(data.location,120),service:text(data.service,100),method:text(data.method,30),message:text(data.message,4000)};
   if(!v.name||!v.phone||!v.location||!v.message||!allowed.has(v.service)||!["Phone","Email","Text message"].includes(v.method))return json({error:"Please complete every required field."},400);
   if(!/^[+()\d .-]{7,30}$/.test(v.phone)||(v.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)))return json({error:"Please enter valid contact information."},400);
-  if(env.TURNSTILE_SECRET_KEY){const token=text(data["cf-turnstile-response"],2048);if(!token)return json({error:"Please complete the security check."},400);const check=await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({secret:env.TURNSTILE_SECRET_KEY,response:token,remoteip:request.headers.get("CF-Connecting-IP")})}).then(r=>r.json());if(!check.success)return json({error:"Security verification failed. Please try again."},400);}
+  const ip=request.headers.get("CF-Connecting-IP")||"unknown";
+  if(limited(ip))return new Response(JSON.stringify({error:"Too many inquiries were submitted. Please wait a few minutes or call 940-654-6334."}),{status:429,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store","retry-after":"600","x-content-type-options":"nosniff"}});
+  if(!env.TURNSTILE_SECRET_KEY)return json({error:"Online security verification is temporarily unavailable. Please call 940-654-6334."},503);
+  const token=text(data["cf-turnstile-response"],2048);if(!token)return json({error:"Please complete the security check."},400);const check=await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({secret:env.TURNSTILE_SECRET_KEY,response:token,remoteip:ip})}).then(r=>r.json());if(!check.success)return json({error:"Security verification failed. Please try again."},400);
   if(!env.RESEND_API_KEY||!env.CONTACT_FROM_EMAIL)return json({error:"Online inquiries are temporarily unavailable. Please call 940-654-6334."},503);
   const body=["New confidential website inquiry","",...Object.entries(v).map(([k,val])=>k.toUpperCase()+": "+val)].join("\n");
   const sent=await fetch("https://api.resend.com/emails",{method:"POST",headers:{authorization:"Bearer "+env.RESEND_API_KEY,"content-type":"application/json"},body:JSON.stringify({from:env.CONTACT_FROM_EMAIL,to:[env.CONTACT_TO_EMAIL||"dfw.csi.info@gmail.com"],reply_to:v.email||undefined,subject:"New CSI confidential inquiry - "+v.service,text:body})});
