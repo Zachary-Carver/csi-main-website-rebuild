@@ -7,7 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 INQUIRY_TARGET = "/contact-us#confidential-inquiry-form"
-SCRIPT = '<script defer src="/assets/csi-inquiry.js?v=20260912"></script>'
+SCRIPT = '<script defer src="/assets/csi-inquiry.js?v=20260912-turnstile"></script>'
 SCRIPT_RE = re.compile(r'<script\b[^>]*src=["\']/assets/csi-inquiry\.js(?:\?[^"\']*)?["\'][^>]*></script>', re.I)
 ANCHOR_RE = re.compile(
     r'<a\b(?P<attrs>[^>]*\bhref=(?P<quote>["\'])mailto:[^"\']*(?P=quote)[^>]*)>(?P<body>.*?)</a>',
