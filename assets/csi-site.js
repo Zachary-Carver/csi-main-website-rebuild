@@ -11,7 +11,7 @@
       [data-aid="HEADER_NAV_RENDERED"], [data-aid="HAMBURGER_MENU_LINK"], [id$="-navId-mobile"] { display:none !important; }
       #csi-primary-nav{position:relative;z-index:1000;background:#080808;color:#fff;border-bottom:2px solid #d8b54a;font-family:Montserrat,Arial,sans-serif}
       #csi-primary-nav *{box-sizing:border-box}
-      .csi-nav-shell{max-width:1180px;margin:auto;padding:12px 20px;display:flex;align-items:center;gap:24px}
+      .csi-nav-shell{width:100%;max-width:1500px;margin:auto;padding:12px clamp(18px,4vw,64px);display:flex;align-items:center;gap:24px}
       .csi-nav-brand{color:#fff;text-decoration:none;font-weight:800;letter-spacing:.04em;font-size:15px;white-space:nowrap}
       .csi-nav-links{margin-left:auto;display:flex;align-items:center;gap:6px}
       .csi-nav-links a,.csi-nav-links summary{color:#fff;text-decoration:none;padding:11px 10px;font-size:13px;font-weight:700;letter-spacing:.035em;cursor:pointer;list-style:none}
@@ -19,10 +19,10 @@
       .csi-nav-links details{position:relative}
       .csi-nav-links details[open]>summary,.csi-nav-links a:hover,.csi-nav-links summary:hover{color:#d8b54a}
       .csi-nav-menu{position:absolute;top:100%;left:0;min-width:260px;padding:8px;background:#111;border:1px solid #333;box-shadow:0 12px 30px rgba(0,0,0,.35);display:grid}
-      .csi-nav-menu a{padding:9px 12px;font-size:12px}
-      .csi-nav-contact{border:1px solid #c22;border-radius:999px}
-      .csi-nav-toggle{display:none;margin-left:auto;background:transparent;color:#fff;border:1px solid #777;border-radius:4px;padding:8px 11px;font:700 13px Montserrat,Arial,sans-serif}
-      .csi-black-response__button:not(.csi-black-response__button--outline),.csi-combined-map__button{color:#080808!important}.csi-black-service-card__dual-links a{min-height:32px;display:flex;align-items:center}.csi-combined-contact__button{min-height:44px;padding:10px 18px}.csi-contact-hp{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}.csi-contact-status{min-height:1.5em;margin-top:12px}.csi-combined-contact__button:disabled{opacity:.65;cursor:wait}
+      .csi-nav-menu a{padding:9px 12px;font-size:13px}
+      .csi-nav-contact{border:1px solid #d8b54a;border-radius:999px}
+      .csi-nav-toggle{display:none;margin-left:auto;background:transparent;color:#fff;border:1px solid #d8b54a;border-radius:4px;padding:8px 11px;font:700 13px Montserrat,Arial,sans-serif}
+      .csi-black-response__button:not(.csi-black-response__button--outline),.csi-combined-map__button{color:#080808!important}.csi-black-service-card__dual-links a{min-height:40px;display:flex;align-items:center}.csi-contact-hp{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
       @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}video[autoplay]{display:none!important}}
       @media(max-width:900px){
         .csi-nav-shell{flex-wrap:wrap;gap:10px}.csi-nav-toggle{display:block}.csi-nav-links{display:none;width:100%;margin:0;align-items:stretch;flex-direction:column;padding:8px 0}.csi-nav-links[data-open="true"]{display:flex}
@@ -127,6 +127,30 @@
     });
   }
 
+  function normalizeReadability() {
+    const minimums = [
+      [".widget-html p, .widget-html li", 15],
+      [".widget-html label", 13],
+      [".widget-html button, .widget-html a", 13]
+    ];
+    minimums.forEach(([selector, minimum]) => {
+      document.querySelectorAll(selector).forEach((element) => {
+        if (element.closest("#csi-primary-nav")) return;
+        const style = window.getComputedStyle(element);
+        const size = Number.parseFloat(style.fontSize);
+        if (Number.isFinite(size) && size < minimum) {
+          element.style.fontSize = minimum + "px";
+        }
+        if ((element.matches("p") || element.matches("li")) && Number.isFinite(size)) {
+          const lineHeight = Number.parseFloat(style.lineHeight);
+          if (Number.isFinite(lineHeight) && lineHeight / Math.max(size, 1) < 1.4) {
+            element.style.lineHeight = "1.55";
+          }
+        }
+      });
+    });
+  }
+
   function decodeMigratedNumericEntities(value) {
     if (!value || !/&#(?:x[0-9a-f]+|\d+);/i.test(value)) return value;
     const decoder = document.createElement("textarea");
@@ -187,24 +211,35 @@
     if (!form) return;
     const status = document.getElementById("csi-contact-status");
     const submit = form.querySelector('button[type="submit"]');
+    const defaultLabel = submit.textContent;
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       if (!form.reportValidity()) return;
-      submit.disabled = true; status.textContent = "Sending your confidential inquiry…";
+      submit.disabled = true;
+      submit.textContent = "Sending…";
+      status.dataset.state = "sending";
+      status.textContent = "Sending your confidential inquiry…";
       try {
         const response = await fetch(form.action, { method: "POST", headers: {"Accept":"application/json"}, body: new FormData(form) });
         const result = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(result.error || "We could not send your inquiry.");
-        form.reset(); status.textContent = "Your confidential inquiry was sent. CSI will contact you as soon as possible.";
+        form.reset();
+        status.dataset.state = "success";
+        status.textContent = "Your confidential inquiry was sent. CSI will contact you as soon as possible.";
       } catch (error) {
+        status.dataset.state = "error";
         status.textContent = (error && error.message) || "We could not send your inquiry. Please call 940-654-6334.";
-      } finally { submit.disabled = false; }
+      } finally {
+        submit.disabled = false;
+        submit.textContent = defaultLabel;
+      }
     });
   }
 
   function initialize() {
     initializePrimaryNav();
     initializeStaticContent();
+    normalizeReadability();
     initializeBlogFormatting();
     initializeContactForm();
     initializeCookieConsent();
