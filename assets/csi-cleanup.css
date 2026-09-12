@@ -60,7 +60,9 @@ body {
   [class*="csi-"][class*="__container"],
   [class*="csi-"][class*="-inner"],
   [class*="csi-"][class*="-shell"],
-  [class*="csi-"][class*="-container"] {
+  [class*="csi-"][class*="-container"],
+  .csi-map-process-divider,
+  .csi-sitemap-divider {
     width: min(calc(100% - (2 * var(--csi-gutter))), var(--csi-layout-max)) !important;
     max-width: var(--csi-layout-max) !important;
     margin-left: auto !important;
@@ -99,6 +101,9 @@ body {
   line-height: 1.2 !important;
   opacity: 1 !important;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .csi-combined-contact__button:hover:not(:disabled),
@@ -178,7 +183,6 @@ body {
 
   .csi-combined-contact__button {
     width: 100%;
-    justify-content: center;
   }
 }
 
