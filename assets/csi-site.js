@@ -17,14 +17,16 @@
       .csi-nav-links a,.csi-nav-links summary{color:#fff;text-decoration:none;padding:11px 10px;font-size:13px;font-weight:700;letter-spacing:.035em;cursor:pointer;list-style:none}
       .csi-nav-links summary::-webkit-details-marker{display:none}
       .csi-nav-links details{position:relative}
-      .csi-nav-links details[open]>summary,.csi-nav-links a:hover,.csi-nav-links summary:hover{color:#ff5a5a}
+      .csi-nav-links details[open]>summary,.csi-nav-links a:hover,.csi-nav-links summary:hover{color:#d8b54a}
       .csi-nav-menu{position:absolute;top:100%;left:0;min-width:260px;padding:8px;background:#111;border:1px solid #333;box-shadow:0 12px 30px rgba(0,0,0,.35);display:grid}
       .csi-nav-menu a{padding:9px 12px;font-size:12px}
       .csi-nav-contact{border:1px solid #c22;border-radius:999px}
       .csi-nav-toggle{display:none;margin-left:auto;background:transparent;color:#fff;border:1px solid #777;border-radius:4px;padding:8px 11px;font:700 13px Montserrat,Arial,sans-serif}
+      .csi-black-response__button:not(.csi-black-response__button--outline),.csi-combined-map__button{color:#080808!important}.csi-black-service-card__dual-links a{min-height:32px;display:flex;align-items:center}.csi-combined-contact__button{min-height:44px;padding:10px 18px}.csi-contact-hp{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}.csi-contact-status{min-height:1.5em;margin-top:12px}.csi-combined-contact__button:disabled{opacity:.65;cursor:wait}
+      @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}video[autoplay]{display:none!important}}
       @media(max-width:900px){
         .csi-nav-shell{flex-wrap:wrap;gap:10px}.csi-nav-toggle{display:block}.csi-nav-links{display:none;width:100%;margin:0;align-items:stretch;flex-direction:column;padding:8px 0}.csi-nav-links[data-open="true"]{display:flex}
-        .csi-nav-links a,.csi-nav-links summary{display:block;padding:11px 4px}.csi-nav-menu{position:static;box-shadow:none;border:0;border-left:2px solid #a00;margin:0 0 6px 8px;background:#111}
+        .csi-nav-links a,.csi-nav-links summary{display:block;padding:11px 4px}.csi-nav-menu{position:static;box-shadow:none;border:0;border-left:2px solid #d8b54a;margin:0 0 6px 8px;background:#111}
       }
     `;
     document.head.appendChild(style);
@@ -77,53 +79,6 @@
       if (control === except) return;
       const panel = control.closest("li")?.querySelector('ul[data-ux="NavDropdown"]');
       if (panel) setExpanded(control, panel, false);
-    });
-  }
-
-  function initializeNavigation() {
-    document.querySelectorAll('[data-aid="NAV_DROPDOWN"][aria-expanded]').forEach((control) => {
-      const panel = control.closest("li")?.querySelector('ul[data-ux="NavDropdown"]');
-      if (!panel) return;
-      panel.hidden = true;
-      control.addEventListener("click", (event) => {
-        event.preventDefault();
-        const expanded = control.getAttribute("aria-expanded") === "true";
-        closeDropdowns(control);
-        setExpanded(control, panel, !expanded);
-      });
-    });
-
-    document.querySelectorAll('[data-aid="HAMBURGER_MENU_LINK"]').forEach((control) => {
-      const panel = document.getElementById(control.getAttribute("toggleId") || "");
-      if (!panel) return;
-      panel.hidden = true;
-      control.addEventListener("click", (event) => {
-        event.preventDefault();
-        const expanded = control.getAttribute("aria-expanded") === "true";
-        setExpanded(control, panel, !expanded);
-        document.documentElement.classList.toggle("csi-menu-open", !expanded);
-      });
-      panel.querySelectorAll('[data-aid*="CLOSE"], a[href]:not([href="#"])').forEach((item) => {
-        item.addEventListener("click", () => {
-          setExpanded(control, panel, false);
-          document.documentElement.classList.remove("csi-menu-open");
-        });
-      });
-    });
-
-    document.addEventListener("click", (event) => {
-      if (!event.target.closest('[data-aid="NAV_DROPDOWN"], ul[data-ux="NavDropdown"]')) {
-        closeDropdowns();
-      }
-    });
-    document.addEventListener("keydown", (event) => {
-      if (event.key !== "Escape") return;
-      closeDropdowns();
-      document.querySelectorAll('[data-aid="HAMBURGER_MENU_LINK"][aria-expanded="true"]').forEach((control) => {
-        const panel = document.getElementById(control.getAttribute("toggleId") || "");
-        if (panel) setExpanded(control, panel, false);
-      });
-      document.documentElement.classList.remove("csi-menu-open");
     });
   }
 
@@ -227,11 +182,31 @@
     });
   }
 
+  function initializeContactForm() {
+    const form = document.getElementById("csi-combined-email-form");
+    if (!form) return;
+    const status = document.getElementById("csi-contact-status");
+    const submit = form.querySelector('button[type="submit"]');
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!form.reportValidity()) return;
+      submit.disabled = true; status.textContent = "Sending your confidential inquiry…";
+      try {
+        const response = await fetch(form.action, { method: "POST", headers: {"Accept":"application/json"}, body: new FormData(form) });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || "We could not send your inquiry.");
+        form.reset(); status.textContent = "Your confidential inquiry was sent. CSI will contact you as soon as possible.";
+      } catch (error) {
+        status.textContent = (error && error.message) || "We could not send your inquiry. Please call 940-654-6334.";
+      } finally { submit.disabled = false; }
+    });
+  }
+
   function initialize() {
     initializePrimaryNav();
     initializeStaticContent();
     initializeBlogFormatting();
-    initializeNavigation();
+    initializeContactForm();
     initializeCookieConsent();
   }
 

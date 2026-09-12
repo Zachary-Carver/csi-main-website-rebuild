@@ -323,19 +323,12 @@ def jsonld_for_page(rel: str, source: str, title: str, description: str, canonic
 
 
 def inject_schema(source: str, rel: str, title: str, description: str, canonical: str) -> str:
-    source = CSI_SCHEMA_BLOCK.sub("", source)
-    payload = json.dumps(
-        jsonld_for_page(rel, source, title, description, canonical),
-        ensure_ascii=False,
-        separators=(",", ":"),
-    )
-    block = (
-        "\n<!-- CSI SEO SCHEMA START -->\n"
-        '<script type="application/ld+json">' + payload + "</script>\n"
-        "<!-- CSI SEO SCHEMA END -->\n"
-    )
+    # Existing pages now contain one authoritative graph. Preserve it idempotently.
+    if 'type="application/ld+json"' in source or "type='application/ld+json'" in source:
+        return source
+    payload = json.dumps(jsonld_for_page(rel, source, title, description, canonical), separators=(",", ":"), ensure_ascii=False)
+    block = SCHEMA_MARKER + "\n" + '<script type="application/ld+json">' + payload + "</script>\n"
     return source.replace("</head>", block + "</head>", 1)
-
 
 def inject_performance_css(source: str) -> str:
     source = CSI_PERF_BLOCK.sub("", source)
