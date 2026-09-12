@@ -188,8 +188,7 @@
   function initializeBlogFormatting() {
     if (!window.location.pathname.startsWith("/follow-us")) return;
 
-    const root = document.querySelector("main") || document.body;
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
       acceptNode(node) {
         const value = node.nodeValue || "";
         const parent = node.parentElement;
