@@ -70,6 +70,9 @@
       .csi-inquiry-page .csi-contact-status{min-height:1.5em;margin:14px 0 0;padding-left:12px;border-left:3px solid transparent;color:#fff;font-size:15px;line-height:1.45}
       .csi-inquiry-page .csi-contact-status[data-state="sending"],.csi-inquiry-page .csi-contact-status[data-state="success"]{border-left-color:#d8b54a}
       .csi-inquiry-page .csi-contact-status[data-state="error"]{border-left-color:#fff}
+      .csi-inquiry-page .csi-turnstile-wrap{margin:18px 0 4px;min-height:65px}
+      .csi-inquiry-page .csi-turnstile-note{margin:8px 0 14px!important;color:#d7d7d7!important;font-size:13px!important;line-height:1.5!important}
+      .csi-inquiry-page .csi-turnstile-note a{color:#e4bf37}
       .csi-inquiry-hp{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
       @media(max-width:900px){.csi-inquiry-page__inner{grid-template-columns:1fr;gap:34px}.csi-inquiry-page__intro{max-width:760px}}
       @media(max-width:620px){.csi-inquiry-page__inner{width:min(calc(100% - 36px),1500px);padding:48px 0}.csi-inquiry-page__grid{grid-template-columns:1fr}.csi-inquiry-page__field--wide{grid-column:auto}.csi-inquiry-page__contact{align-items:flex-start;flex-direction:column;gap:5px}.csi-inquiry-page .csi-combined-contact__button{width:100%}}
@@ -110,6 +113,8 @@
               <div class="csi-inquiry-page__field csi-inquiry-page__field--wide"><label for="csi-inquiry-message">How can we help?</label><textarea id="csi-inquiry-message" name="message" maxlength="4000" required></textarea></div>
             </div>
             <div class="csi-inquiry-hp" aria-hidden="true"><label for="csi-inquiry-company">Company website</label><input id="csi-inquiry-company" name="company_website" type="text" tabindex="-1" autocomplete="off"></div>
+            <div class="csi-turnstile-wrap"><div class="cf-turnstile" data-theme="dark" data-action="contact"></div></div>
+            <p class="csi-turnstile-note">This form uses Cloudflare Turnstile for abuse prevention and Resend for secure email delivery. See our <a href="/privacy-policy/">Privacy Policy</a>.</p>
             <button class="csi-combined-contact__button" type="submit">Submit confidential inquiry</button>
             <p id="csi-dedicated-contact-status" class="csi-contact-status" role="status" aria-live="polite"></p>
           </form>
@@ -137,6 +142,25 @@
     const status = document.getElementById("csi-dedicated-contact-status");
     const submit = form.querySelector('button[type="submit"]');
     const defaultLabel = submit.textContent;
+    const turnstile = form.querySelector(".cf-turnstile");
+    fetch("/api/turnstile-config", { headers: { Accept: "application/json" } })
+      .then((response) => response.ok ? response.json() : Promise.reject())
+      .then(({ siteKey }) => {
+        if (!siteKey) return;
+        turnstile.dataset.sitekey = siteKey;
+        if (!document.querySelector('script[data-csi-turnstile]')) {
+          const script = document.createElement("script");
+          script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+          script.async = true;
+          script.defer = true;
+          script.dataset.csiTurnstile = "true";
+          document.head.appendChild(script);
+        }
+      })
+      .catch(() => {
+        status.dataset.state = "error";
+        status.textContent = "Online security verification is temporarily unavailable. Please call 940-654-6334.";
+      });
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -154,6 +178,7 @@
         const result = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(result.error || "We could not send your inquiry.");
         form.reset();
+        if (window.turnstile) window.turnstile.reset(turnstile);
         status.dataset.state = "success";
         status.textContent = "Your confidential inquiry was sent. CSI will contact you as soon as possible.";
       } catch (error) {
