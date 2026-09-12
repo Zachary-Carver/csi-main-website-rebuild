@@ -33,6 +33,7 @@ jobs:
         run: |
           python scripts/repair_site.py --write
           python scripts/fix_img_markup.py
+          python scripts/apply_layout_cleanup.py
 
       - name: Persist normalized source to main
         shell: bash
