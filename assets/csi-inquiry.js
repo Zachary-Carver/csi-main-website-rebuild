@@ -116,6 +116,15 @@
         </div>
       </div>`;
 
+    // The contact page is one custom content widget containing several sections.
+    // Place the inquiry form immediately after the intro so it is the second content block.
+    const contactPage = document.querySelector(".csi-contact-page");
+    const firstContentBlock = contactPage?.querySelector("section.csi-contact-section");
+    if (contactPage && firstContentBlock && firstContentBlock.parentNode === contactPage) {
+      firstContentBlock.insertAdjacentElement("afterend", section);
+      return;
+    }
+
     const footer = document.querySelector('.widget-footer, [role="contentinfo"]');
     if (footer?.parentNode) footer.parentNode.insertBefore(section, footer);
     else document.body.appendChild(section);
