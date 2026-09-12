@@ -1,0 +1,192 @@
+/* CSI post-GoDaddy layout and readability cleanup.
+   Keeps the black/gold/white brand while removing obsolete builder safe-area constraints. */
+:root {
+  --csi-layout-max: 1500px;
+  --csi-gutter: clamp(24px, 4vw, 64px);
+  --csi-gold: #c9a227;
+  --csi-black: #000000;
+  --csi-panel: #151515;
+  --csi-text: #f7f7f7;
+  --csi-muted: #d7d7d7;
+}
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  background: var(--csi-black);
+  overflow-x: hidden;
+}
+
+.page-inner {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
+/* The migrated GoDaddy wrapper added desktop safe areas and 100px section padding.
+   Custom CSI sections already provide their own spacing, so remove only the obsolete wrapper spacing. */
+.widget-html [data-aid="HTML_SECTION_RENDERED"] {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.widget-html [data-ux="SectionContainer"] {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.widget-html [data-ux="Grid"],
+.widget-html [data-ux="GridCell"],
+.csi-promoted-html-block {
+  max-width: none !important;
+}
+
+.csi-promoted-html-block {
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Let section backgrounds use the viewport while keeping readable content centered. */
+@media (min-width: 1024px) {
+  [class*="csi-"][class*="__inner"],
+  [class*="csi-"][class*="__shell"],
+  [class*="csi-"][class*="__container"],
+  [class*="csi-"][class*="-inner"],
+  [class*="csi-"][class*="-shell"],
+  [class*="csi-"][class*="-container"] {
+    width: min(calc(100% - (2 * var(--csi-gutter))), var(--csi-layout-max)) !important;
+    max-width: var(--csi-layout-max) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+
+/* Form readability and brand-consistent controls. */
+.csi-combined-contact__field input,
+.csi-combined-contact__field select,
+.csi-combined-contact__field textarea {
+  min-height: 44px;
+  font-size: 16px !important;
+  line-height: 1.45 !important;
+}
+
+.csi-combined-contact__field textarea {
+  min-height: 150px;
+}
+
+.csi-combined-contact__field label {
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0.08em !important;
+}
+
+.csi-combined-contact__button {
+  min-height: 48px !important;
+  padding: 12px 20px !important;
+  border: 1px solid var(--csi-gold) !important;
+  border-radius: 0 !important;
+  background: var(--csi-gold) !important;
+  color: #080808 !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  opacity: 1 !important;
+  cursor: pointer;
+}
+
+.csi-combined-contact__button:hover:not(:disabled),
+.csi-combined-contact__button:focus-visible:not(:disabled) {
+  background: #e0bd3a !important;
+  border-color: #e0bd3a !important;
+  color: #080808 !important;
+}
+
+.csi-combined-contact__button:focus-visible,
+.widget-html a:focus-visible,
+.widget-html button:focus-visible,
+.widget-html input:focus-visible,
+.widget-html select:focus-visible,
+.widget-html textarea:focus-visible {
+  outline: 3px solid var(--csi-gold) !important;
+  outline-offset: 3px !important;
+}
+
+.csi-combined-contact__button:disabled {
+  background: #8f7725 !important;
+  border-color: #8f7725 !important;
+  color: #080808 !important;
+  opacity: 1 !important;
+  cursor: wait !important;
+}
+
+.csi-contact-status {
+  min-height: 1.5em;
+  margin-top: 14px !important;
+  padding-left: 12px;
+  border-left: 3px solid transparent;
+  font-size: 15px !important;
+  line-height: 1.45 !important;
+  color: var(--csi-text) !important;
+}
+
+.csi-contact-status[data-state="sending"] {
+  border-left-color: var(--csi-gold);
+}
+
+.csi-contact-status[data-state="success"] {
+  border-left-color: var(--csi-gold);
+  color: #ffffff !important;
+}
+
+.csi-contact-status[data-state="error"] {
+  border-left-color: #ffffff;
+  color: #ffffff !important;
+}
+
+/* Improve small link rows and controls without changing the wording or typography hierarchy. */
+.widget-html [class*="__links"] a,
+.widget-html [class*="__actions"] a,
+.widget-html [class*="__nav"] a,
+.widget-html [class*="link-row"] a {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+}
+
+@media (max-width: 1023px) {
+  :root { --csi-gutter: 28px; }
+
+  [class*="csi-"][class*="__inner"],
+  [class*="csi-"][class*="__shell"],
+  [class*="csi-"][class*="__container"],
+  [class*="csi-"][class*="-inner"],
+  [class*="csi-"][class*="-shell"],
+  [class*="csi-"][class*="-container"] {
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 767px) {
+  :root { --csi-gutter: 18px; }
+
+  .csi-combined-contact__button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
