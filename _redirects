@@ -1,5 +1,6 @@
 # CSI canonical and legacy redirects
 /home / 301
+/home/f/* /follow-us/f/:splat 301
 /ols/products / 301
 /f/* /follow-us/f/:splat 301
 /grapevine-tx-response /service-areas-in-texas 301
