@@ -97,7 +97,8 @@ REDIRECT_STUBS = {
 REDIRECT_RULES = [
     "/home / 301",
     "/ols/products / 301",
-    "/f/* /follow-us/f/:splat 301",
+    "/f/* /follow-us/f/:splat/ 301",
+    "/home/f/* /follow-us/f/:splat/ 301",
     "/grapevine-tx-response /service-areas-in-texas 301",
     "/safety-compliance /safety-and-compliance 301",
     "/farmers-branch-tx-response /farmers-branch-response 301",
@@ -204,7 +205,9 @@ def route_from_rel(rel: str) -> str:
     if rel == "index.html":
         return "/"
     if rel.endswith("/index.html"):
-        return "/" + rel[: -len("/index.html")]
+        route = "/" + rel[: -len("/index.html")] + "/"
+        # Both spellings exist in the historic export. Publish one encoded URL.
+        return route.replace("|", "%7C")
     return "/" + rel
 
 
@@ -440,8 +443,12 @@ def normalize_html(path: Path) -> tuple[str, bool]:
             "24/7 Crime Scene & Biohazard Cleanup Across Texas",
             "24/7 Crime Scene & Biohazard Cleanup in DFW & North Texas",
         )
-    elif not canonical:
-        canonical = SITE + route_from_rel(rel)
+    else:
+        desired_canonical = SITE + route_from_rel(rel)
+        if canonical and canonical != desired_canonical:
+            # Keep canonical, OG and existing JSON-LD URLs synchronized.
+            source = source.replace(canonical, desired_canonical)
+        canonical = desired_canonical
         source = set_canonical(source, canonical)
 
     if description:
@@ -491,9 +498,12 @@ def update_redirects(write: bool) -> bool:
     existing = path.read_text(encoding="utf-8") if path.exists() else ""
     existing_rules = [line.strip() for line in existing.splitlines() if line.strip() and not line.lstrip().startswith("#")]
     merged: list[str] = []
+    seen_sources: set[str] = set()
     for rule in REDIRECT_RULES + existing_rules:
-        if rule not in merged:
+        source = rule.split()[0]
+        if source not in seen_sources:
             merged.append(rule)
+            seen_sources.add(source)
     updated = "# CSI canonical and legacy redirects\n" + "\n".join(merged) + "\n"
     if updated != existing and write:
         path.write_text(updated, encoding="utf-8")
