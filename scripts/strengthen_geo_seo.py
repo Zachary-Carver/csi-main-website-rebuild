@@ -38,7 +38,7 @@ SERVICE_META = {
     ),
     "unattended-death-cleanup": (
         "Unattended Death Cleanup Dallas-Fort Worth | CSI",
-        f"24/7 unattended death and decomposition cleanup across the {REGION} and {SECONDARY_REGION}. Compassionate, discreet response. Call {PHONE}.",
+        f"24/7 unattended death and decomposition cleanup across DFW and {SECONDARY_REGION}. Compassionate, discreet response. Call {PHONE}.",
     ),
     "decomposition-cleanup-dfw": (
         "Decomposition Cleanup Dallas-Fort Worth | CSI",
@@ -46,7 +46,7 @@ SERVICE_META = {
     ),
     "suicide-cleanup-dfw": (
         "Suicide Cleanup Dallas-Fort Worth | CSI",
-        f"Compassionate 24/7 suicide and trauma cleanup across the {REGION} and {SECONDARY_REGION}. Former CSI-founded specialty response. Call {PHONE}.",
+        f"Compassionate 24/7 suicide and trauma cleanup across DFW and {SECONDARY_REGION}. Former CSI-founded response. Call {PHONE}.",
     ),
     "homicide-cleanup-dfw": (
         "Homicide Cleanup Dallas-Fort Worth | CSI",
@@ -54,7 +54,7 @@ SERVICE_META = {
     ),
     "hoarding-cleanup-in-texas": (
         "Hoarding Cleanup Dallas-Fort Worth & North Texas | CSI",
-        f"Hazardous hoarding and extreme-mess cleanup across the {REGION} and {SECONDARY_REGION}, with qualifying response elsewhere in Texas. Call {PHONE}.",
+        f"Hazardous hoarding and extreme-mess cleanup across DFW and {SECONDARY_REGION}, with qualifying statewide Texas response. Call {PHONE}.",
     ),
     "advanced-odor-removal-dfw": (
         "Forensic Odor Removal Dallas-Fort Worth | CSI",
@@ -76,6 +76,13 @@ TOP_CITIES = [
     ("Irving", "/irving-tx-response/"),
     ("McKinney", "/mckinney-tx-response/"),
 ]
+
+META_OVERRIDES = {
+    "follow-us/f/why-local-woman-owned-businesses-matter-in-north-texas/index.html":
+        "Why local woman-owned businesses matter across Dallas-Fort Worth (DFW) and North Texas, including CSI: Clean Scene Investigators.",
+    "follow-us/f/why-not-all-cleaning-is-safe-what-you-need-to-know-before-you-to/index.html":
+        "Why some crime scene, blood and biohazard cleanup in Dallas-Fort Worth (DFW) and North Texas requires trained specialty remediation.",
+}
 
 
 def esc_attr(value: str) -> str:
@@ -177,7 +184,7 @@ def apply(path: Path) -> bool:
 
     if rel == "index.html":
         title = "Crime Scene & Biohazard Cleanup Dallas-Fort Worth | CSI"
-        desc = f"24/7 crime scene, trauma, biohazard, blood, unattended death, decomposition, hoarding, odor and vehicle cleanup across the {REGION} and {SECONDARY_REGION}. Call {PHONE}."
+        desc = f"24/7 crime scene, trauma, biohazard, blood, unattended-death, hoarding, odor and vehicle cleanup across DFW and {SECONDARY_REGION}. Call {PHONE}."
         source = set_title(source, title)
         source = set_meta(source, "name", "description", desc)
         source = set_meta(source, "property", "og:title", title)
@@ -198,7 +205,7 @@ def apply(path: Path) -> bool:
         targeted = True
     elif rel == "service-areas-in-texas/index.html":
         title = "Dallas-Fort Worth & North Texas Crime Scene Cleanup Areas | CSI"
-        desc = f"CSI serves the {REGION} and {SECONDARY_REGION} for crime scene, trauma and biohazard cleanup, with qualifying statewide Texas response. Call {PHONE}."
+        desc = f"Crime scene, trauma and biohazard cleanup across Dallas-Fort Worth (DFW) and {SECONDARY_REGION}, with qualifying statewide Texas response. Call {PHONE}."
         source = set_title(source, title)
         source = set_meta(source, "name", "description", desc)
         source = set_meta(source, "property", "og:title", title)
@@ -213,11 +220,16 @@ def apply(path: Path) -> bool:
         source = set_meta(source, "property", "og:description", desc)
         targeted = True
     elif city:
-        desc = f"24/7 crime scene, trauma, blood, unattended death and biohazard cleanup in {city}, TX, within the {REGION} and {SECONDARY_REGION}. Call {PHONE}."
+        desc = f"24/7 crime scene, trauma, blood and biohazard cleanup in {city}, TX, across Dallas-Fort Worth (DFW) and {SECONDARY_REGION}. Call {PHONE}."
         source = set_meta(source, "name", "description", desc)
         source = set_meta(source, "property", "og:description", desc)
         source = set_meta(source, "name", "twitter:description", desc)
         targeted = True
+
+    if rel in META_OVERRIDES:
+        source = set_meta(source, "name", "description", META_OVERRIDES[rel])
+        source = set_meta(source, "property", "og:description", META_OVERRIDES[rel])
+        source = set_meta(source, "name", "twitter:description", META_OVERRIDES[rel])
 
     if targeted:
         source = set_meta(source, "name", "geo.region", "US-TX")
