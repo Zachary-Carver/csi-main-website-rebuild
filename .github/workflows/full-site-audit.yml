@@ -1,0 +1,46 @@
+name: Full live page and button audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/audit-every-page-button.mjs'
+      - '.github/workflows/full-site-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+
+      - name: Audit every live page, link, button and form
+        id: audit
+        continue-on-error: true
+        run: node scripts/audit-every-page-button.mjs https://cleansceneinvestigators.com
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: csi-full-site-audit
+          path: full-site-audit.json
+          if-no-files-found: error
+
+      - name: Fail on critical or high issues
+        if: steps.audit.outcome == 'failure'
+        run: exit 1
