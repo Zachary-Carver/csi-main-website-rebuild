@@ -2,6 +2,16 @@
   "use strict";
 
   const INQUIRY_TARGET = "/contact-us#confidential-inquiry-form";
+  const PROFESSIONAL_TYPES = {
+    "feedback": "Private client feedback",
+    "recommendation": "Professional recommendation",
+    "media": "Media, speaking, or press inquiry",
+    "privacy-request": "Privacy request",
+    "privacy-question": "Privacy question",
+    "general": "General inquiry",
+    "vendor": "Vendor information request",
+    "documentation": "Company documentation request"
+  };
   const INQUIRY_INTENT = /(submit\s+(?:a\s+)?confidential\s+inquiry|request\s+(?:confidential\s+)?help|open\s+(?:the\s+)?(?:full\s+)?inquiry\s+page|open\s+(?:the\s+)?form|inquiry\s+form|confidential\s+request|request\s+service|start\s+(?:a\s+)?confidential\s+request|get\s+(?:confidential\s+)?help)/i;
 
   function isHomepage() {
@@ -135,6 +145,121 @@
     else document.body.appendChild(section);
   }
 
+  function ensureTurnstile(turnstile, status) {
+    return fetch("/api/turnstile-config", { headers: { Accept: "application/json" } })
+      .then((response) => response.ok ? response.json() : Promise.reject())
+      .then(({ siteKey }) => {
+        if (!siteKey) throw new Error();
+        if (!window.__csiTurnstileReady) {
+          window.__csiTurnstileReady = new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+          script.async = true;
+          script.defer = true;
+          script.dataset.csiTurnstile = "true";
+          script.addEventListener("load", resolve, { once: true });
+          script.addEventListener("error", reject, { once: true });
+          document.head.appendChild(script);
+          });
+        }
+        return window.__csiTurnstileReady.then(() => {
+          if (!turnstile.querySelector("iframe")) {
+            window.turnstile.render(turnstile, {
+              sitekey: siteKey,
+              theme: turnstile.dataset.theme || "dark",
+              action: turnstile.dataset.action
+            });
+          }
+        });
+      })
+      .catch(() => {
+        status.dataset.state = "error";
+        status.textContent = "Online security verification is temporarily unavailable. Please call 940-654-6334.";
+      });
+  }
+
+  function buildProfessionalSection() {
+    const path = window.location.pathname.replace(/\/+$/, "") || "/";
+    if (path !== "/contact-us" || document.getElementById("professional-inquiry-form")) return;
+    injectStyles();
+    const requested = new URLSearchParams(window.location.search).get("inquiry") || "general";
+    const selected = Object.hasOwn(PROFESSIONAL_TYPES, requested) ? requested : "general";
+    const options = Object.entries(PROFESSIONAL_TYPES)
+      .map(([value, label]) => `<option value="${value}"${value === selected ? " selected" : ""}>${label}</option>`)
+      .join("");
+    const section = document.createElement("section");
+    section.id = "professional-inquiry-form";
+    section.className = "csi-inquiry-page";
+    section.setAttribute("aria-labelledby", "csi-professional-title");
+    section.innerHTML = `
+      <div class="csi-inquiry-page__inner">
+        <div class="csi-inquiry-page__intro">
+          <p class="csi-inquiry-page__eyebrow">General and professional inquiries</p>
+          <h2 id="csi-professional-title">Contact CSI.</h2>
+          <p>Use this form for feedback, media or speaking requests, privacy questions, vendor information, company documentation, and other non-cleanup inquiries.</p>
+          <div class="csi-inquiry-page__contacts" aria-label="Direct contact options">
+            <a class="csi-inquiry-page__contact" href="tel:9406546334"><span>Call CSI</span><strong>940-654-6334</strong></a>
+            <a class="csi-inquiry-page__contact" href="mailto:dfw.csi.info@gmail.com"><span>Email CSI</span><strong>dfw.csi.info@gmail.com</strong></a>
+          </div>
+          <p class="csi-inquiry-page__notice">Do not include graphic photographs, medical records, legal documents, financial account details, or other highly sensitive information.</p>
+        </div>
+        <div class="csi-inquiry-page__panel">
+          <form id="csi-professional-form" action="/api/professional-inquiry" method="post" novalidate>
+            <div class="csi-inquiry-page__grid">
+              <div class="csi-inquiry-page__field"><label for="csi-professional-name">Your name</label><input id="csi-professional-name" name="name" type="text" autocomplete="name" maxlength="100" required></div>
+              <div class="csi-inquiry-page__field"><label for="csi-professional-email">Email address</label><input id="csi-professional-email" name="email" type="email" autocomplete="email" maxlength="254" required></div>
+              <div class="csi-inquiry-page__field"><label for="csi-professional-phone">Phone number (optional)</label><input id="csi-professional-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="30"></div>
+              <div class="csi-inquiry-page__field"><label for="csi-professional-organization">Organization (optional)</label><input id="csi-professional-organization" name="organization" type="text" autocomplete="organization" maxlength="160"></div>
+              <div class="csi-inquiry-page__field csi-inquiry-page__field--wide"><label for="csi-professional-type">Request type</label><select id="csi-professional-type" name="request_type" required>${options}</select></div>
+              <div class="csi-inquiry-page__field csi-inquiry-page__field--wide"><label for="csi-professional-message">How can we help?</label><textarea id="csi-professional-message" name="message" maxlength="4000" required></textarea></div>
+            </div>
+            <div class="csi-inquiry-hp" aria-hidden="true"><label for="csi-professional-company-site">Company website</label><input id="csi-professional-company-site" name="company_website" type="text" tabindex="-1" autocomplete="off"></div>
+            <div class="csi-turnstile-wrap"><div class="cf-turnstile" data-theme="dark" data-action="professional-inquiry"></div></div>
+            <p class="csi-turnstile-note">This form uses Cloudflare Turnstile for abuse prevention and Resend for secure email delivery. See our <a href="/privacy-policy/">Privacy Policy</a>.</p>
+            <button class="csi-combined-contact__button" type="submit">Submit professional inquiry</button>
+            <p id="csi-professional-status" class="csi-contact-status" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+      </div>`;
+    const cleanup = document.getElementById("confidential-inquiry-form");
+    if (cleanup?.parentNode) cleanup.insertAdjacentElement("afterend", section);
+    else document.body.appendChild(section);
+  }
+
+  function initializeProfessionalForm() {
+    const form = document.getElementById("csi-professional-form");
+    if (!form || form.dataset.csiBound === "true") return;
+    form.dataset.csiBound = "true";
+    const status = document.getElementById("csi-professional-status");
+    const submit = form.querySelector('button[type="submit"]');
+    const defaultLabel = submit.textContent;
+    const turnstile = form.querySelector(".cf-turnstile");
+    ensureTurnstile(turnstile, status);
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!form.reportValidity()) return;
+      submit.disabled = true;
+      submit.textContent = "Sending…";
+      status.dataset.state = "sending";
+      status.textContent = "Sending your inquiry…";
+      try {
+        const response = await fetch(form.action, { method: "POST", headers: { Accept: "application/json" }, body: new FormData(form) });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || "We could not send your inquiry.");
+        form.reset();
+        if (window.turnstile) window.turnstile.reset(turnstile);
+        status.dataset.state = "success";
+        status.textContent = "Your inquiry was sent. CSI will respond as soon as possible.";
+      } catch (error) {
+        status.dataset.state = "error";
+        status.textContent = (error && error.message) || "We could not send your inquiry. Please call 940-654-6334.";
+      } finally {
+        submit.disabled = false;
+        submit.textContent = defaultLabel;
+      }
+    });
+  }
+
   function initializeDedicatedForm() {
     const form = document.getElementById("csi-dedicated-inquiry-form");
     if (!form || form.dataset.csiBound === "true") return;
@@ -143,24 +268,7 @@
     const submit = form.querySelector('button[type="submit"]');
     const defaultLabel = submit.textContent;
     const turnstile = form.querySelector(".cf-turnstile");
-    fetch("/api/turnstile-config", { headers: { Accept: "application/json" } })
-      .then((response) => response.ok ? response.json() : Promise.reject())
-      .then(({ siteKey }) => {
-        if (!siteKey) return;
-        turnstile.dataset.sitekey = siteKey;
-        if (!document.querySelector('script[data-csi-turnstile]')) {
-          const script = document.createElement("script");
-          script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
-          script.async = true;
-          script.defer = true;
-          script.dataset.csiTurnstile = "true";
-          document.head.appendChild(script);
-        }
-      })
-      .catch(() => {
-        status.dataset.state = "error";
-        status.textContent = "Online security verification is temporarily unavailable. Please call 940-654-6334.";
-      });
+    ensureTurnstile(turnstile, status);
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -195,7 +303,9 @@
     normalizeInquiryLinks();
     if (!isHomepage()) {
       buildInquirySection();
+      buildProfessionalSection();
       initializeDedicatedForm();
+      initializeProfessionalForm();
     }
   }
 

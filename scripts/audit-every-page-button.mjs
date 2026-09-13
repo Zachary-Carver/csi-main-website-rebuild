@@ -30,7 +30,7 @@ const issues = [];
 const pageResults = [];
 const internalTargets = new Set();
 const externalButtonTargets = new Set();
-const inquiryIntent = /(submit\s+(?:a\s+)?confidential\s+inquiry|request\s+(?:confidential\s+)?help|open\s+(?:the\s+)?(?:full\s+)?inquiry\s+page|open\s+(?:the\s+)?form|inquiry\s+form|confidential\s+request|request\s+service|start\s+(?:a\s+)?confidential\s+request|get\s+(?:confidential\s+)?help)/i;
+const inquiryIntent = /(submit\s+(?:a\s+)?confidential\s+inquiry|request\s+(?:confidential\s+)?help|open\s+(?:the\s+)?(?:full\s+)?inquiry\s+page|open\s+(?:the\s+)?form|inquiry\s+form|confidential\s+request|request\s+service|start\s+(?:a\s+)?confidential\s+request|get\s+(?:confidential\s+)?help|share\s+private\s+feedback|send\s+recommendation|submit\s+(?:a\s+)?media\s+inquiry|submit\s+(?:a\s+)?privacy\s+request|ask\s+(?:a\s+)?privacy\s+question|request\s+vendor\s+information|request\s+company\s+documentation)/i;
 
 function addIssue(severity, route, type, detail) { issues.push({ severity, route, type, detail }); }
 function cleanUrl(value) { try { return new URL(value, BASE + "/"); } catch { return null; } }
@@ -201,6 +201,8 @@ try {
     if (route === "/contact-us/") {
       const contactForm = desktop.forms.find((f) => f.id === "csi-dedicated-inquiry-form");
       if (!contactForm || contactForm.action !== "/api/contact" || contactForm.method !== "post") addIssue("critical", route, "contact-page-form", JSON.stringify(contactForm || null));
+      const professionalForm = desktop.forms.find((f) => f.id === "csi-professional-form");
+      if (!professionalForm || professionalForm.action !== "/api/professional-inquiry" || professionalForm.method !== "post") addIssue("critical", route, "professional-form", JSON.stringify(professionalForm || null));
       const sectionOrder = await page.evaluate(() => {
         const form = document.getElementById("confidential-inquiry-form");
         const parent = form?.parentElement;

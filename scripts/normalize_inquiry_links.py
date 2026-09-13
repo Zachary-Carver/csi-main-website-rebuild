@@ -7,7 +7,19 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 INQUIRY_TARGET = "/contact-us#confidential-inquiry-form"
-SCRIPT = '<script defer src="/assets/csi-inquiry.js?v=20260912-turnstile"></script>'
+PROFESSIONAL_TARGETS = {
+    "share private feedback": "feedback",
+    "send recommendation": "recommendation",
+    "submit media inquiry": "media",
+    "submit a privacy request": "privacy-request",
+    "submit privacy request": "privacy-request",
+    "ask a privacy question": "privacy-question",
+    "ask privacy question": "privacy-question",
+    "contact csi": "general",
+    "request vendor information": "vendor",
+    "request company documentation": "documentation",
+}
+SCRIPT = '<script defer src="/assets/csi-inquiry.js?v=20260912-professional-closeout"></script>'
 SCRIPT_RE = re.compile(r'<script\b[^>]*src=["\']/assets/csi-inquiry\.js(?:\?[^"\']*)?["\'][^>]*></script>', re.I)
 ANCHOR_RE = re.compile(
     r'<a\b(?P<attrs>[^>]*\bhref=(?P<quote>["\'])mailto:[^"\']*(?P=quote)[^>]*)>(?P<body>.*?)</a>',
@@ -49,6 +61,27 @@ def rewrite_anchor(match: re.Match[str]) -> str:
     return '<a' + attrs + '>' + body + '</a>'
 
 
+def rewrite_professional_anchor(match: re.Match[str]) -> str:
+    attrs = match.group('attrs')
+    body = match.group('body')
+    label = visible_text(attrs, body).lower()
+    request_type = PROFESSIONAL_TARGETS.get(label)
+    if not request_type:
+        return match.group(0)
+    target = f"/contact-us/?inquiry={request_type}#professional-inquiry-form"
+    attrs = re.sub(
+        r'\bhref=(["\'])[^"\']*\1',
+        f'href="{target}"',
+        attrs,
+        count=1,
+        flags=re.I,
+    )
+    attrs = re.sub(r'\s+target=(["\'])_top\1', '', attrs, flags=re.I)
+    if 'data-csi-professional-link=' not in attrs.lower():
+        attrs += f' data-csi-professional-link="{request_type}"'
+    return '<a' + attrs + '>' + body + '</a>'
+
+
 def count_non_email_mailtos(source: str) -> int:
     return sum(1 for match in ANCHOR_RE.finditer(source) if should_route_to_form(match))
 
@@ -65,6 +98,12 @@ def normalize_html(path: Path) -> tuple[bool, int, int]:
 
     before = count_non_email_mailtos(text)
     updated = ANCHOR_RE.sub(rewrite_anchor, text)
+    updated = re.sub(
+        r'<a\b(?P<attrs>[^>]*\bhref=(?P<quote>["\'])[^"\']*(?P=quote)[^>]*)>(?P<body>.*?)</a>',
+        rewrite_professional_anchor,
+        updated,
+        flags=re.I | re.S,
+    )
     after = count_non_email_mailtos(updated)
 
     updated = SCRIPT_RE.sub(SCRIPT, updated)
