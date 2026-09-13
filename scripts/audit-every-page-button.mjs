@@ -30,16 +30,10 @@ const issues = [];
 const pageResults = [];
 const internalTargets = new Set();
 const externalButtonTargets = new Set();
-
 const inquiryIntent = /(submit\s+(?:a\s+)?confidential\s+inquiry|request\s+(?:confidential\s+)?help|open\s+(?:the\s+)?(?:full\s+)?inquiry\s+page|open\s+(?:the\s+)?form|inquiry\s+form|confidential\s+request|request\s+service|start\s+(?:a\s+)?confidential\s+request|get\s+(?:confidential\s+)?help)/i;
 
-function addIssue(severity, route, type, detail) {
-  issues.push({ severity, route, type, detail });
-}
-
-function cleanUrl(value) {
-  try { return new URL(value, BASE + "/"); } catch { return null; }
-}
+function addIssue(severity, route, type, detail) { issues.push({ severity, route, type, detail }); }
+function cleanUrl(value) { try { return new URL(value, BASE + "/"); } catch { return null; } }
 
 async function checkUrl(urlString) {
   let current = urlString;
@@ -47,10 +41,7 @@ async function checkUrl(urlString) {
   for (let hop = 0; hop < 6; hop++) {
     let response;
     try {
-      response = await fetch(current, {
-        redirect: "manual",
-        headers: { "user-agent": "CSI-Full-Site-Audit/1.0" }
-      });
+      response = await fetch(current, { redirect: "manual", headers: { "user-agent": "CSI-Full-Site-Audit/1.0" } });
     } catch (error) {
       return { ok: false, final: current, chain, error: String(error) };
     }
@@ -84,7 +75,7 @@ try {
       continue;
     }
 
-    const desktop = await page.evaluate(({ base, inquirySource }) => {
+    const desktop = await page.evaluate(({ inquirySource }) => {
       const inquiryRx = new RegExp(inquirySource, "i");
       const isVisible = (el) => {
         const s = getComputedStyle(el);
@@ -92,17 +83,27 @@ try {
         return s.display !== "none" && s.visibility !== "hidden" && Number(s.opacity) > 0 && r.width > 0 && r.height > 0;
       };
       const labelFor = (el) => (el.innerText || el.textContent || el.getAttribute("aria-label") || el.getAttribute("title") || "").replace(/\s+/g, " ").trim();
-      const anchors = [...document.querySelectorAll("a")].map((el, i) => ({
-        i,
-        text: labelFor(el),
-        href: el.getAttribute("href") || "",
-        absoluteHref: el.href || "",
-        visible: isVisible(el),
-        className: typeof el.className === "string" ? el.className : "",
-        role: el.getAttribute("role") || "",
-        fontSize: parseFloat(getComputedStyle(el).fontSize) || 0,
-        buttonLike: /button|btn|cta/i.test(typeof el.className === "string" ? el.className : "") || el.getAttribute("role") === "button"
-      }));
+      const anchors = [...document.querySelectorAll("a")].map((el, i) => {
+        const rawHref = el.getAttribute("href") || "";
+        let fragmentExists = true;
+        if (rawHref.startsWith("#") && rawHref.length > 1) {
+          let id = rawHref.slice(1);
+          try { id = decodeURIComponent(id); } catch {}
+          fragmentExists = !!document.getElementById(id);
+        }
+        return {
+          i,
+          text: labelFor(el),
+          href: rawHref,
+          absoluteHref: el.href || "",
+          visible: isVisible(el),
+          className: typeof el.className === "string" ? el.className : "",
+          role: el.getAttribute("role") || "",
+          fontSize: parseFloat(getComputedStyle(el).fontSize) || 0,
+          buttonLike: /button|btn|cta/i.test(typeof el.className === "string" ? el.className : "") || el.getAttribute("role") === "button",
+          fragmentExists
+        };
+      });
       const buttons = [...document.querySelectorAll("button,[role='button']")].map((el, i) => ({
         i,
         text: labelFor(el),
@@ -131,12 +132,16 @@ try {
         .map((el) => ({ tag: el.tagName, text: labelFor(el).slice(0, 120), size: parseFloat(getComputedStyle(el).fontSize) || 0 }))
         .filter((item) => item.text && item.size > 0 && item.size < 12)
         .slice(0, 20);
-      const h1s = document.querySelectorAll("h1").length;
-      const canonical = document.querySelector('link[rel="canonical"]')?.href || "";
-      const overflow = document.documentElement.scrollWidth > document.documentElement.clientWidth + 1;
-      const inquiryMailtos = anchors.filter((a) => /^mailto:/i.test(a.href) && inquiryRx.test(a.text));
-      return { anchors, buttons, summaries, forms, duplicateIds, tinyText, h1s, canonical, overflow, inquiryMailtos, title: document.title, finalUrl: location.href, base };
-    }, { base: BASE, inquirySource: inquiryIntent.source });
+      return {
+        anchors, buttons, summaries, forms, duplicateIds, tinyText,
+        h1s: document.querySelectorAll("h1").length,
+        canonical: document.querySelector('link[rel="canonical"]')?.href || "",
+        overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+        inquiryMailtos: anchors.filter((a) => /^mailto:/i.test(a.href) && inquiryRx.test(a.text)),
+        title: document.title,
+        finalUrl: location.href
+      };
+    }, { inquirySource: inquiryIntent.source });
 
     const status = response?.status() || 0;
     const expected404 = route === "/__csi_audit_missing_page__";
@@ -153,6 +158,10 @@ try {
       if (!anchor.text) addIssue("high", route, "unnamed-link", `href=${anchor.href || "(empty)"}`);
       const href = anchor.href.trim();
       if (!href || href === "#" || /^javascript:/i.test(href)) addIssue("high", route, "dead-link", `${anchor.text || "(unnamed)"} -> ${href || "(empty)"}`);
+      if (href.startsWith("#")) {
+        if (href.length > 1 && !anchor.fragmentExists) addIssue("high", route, "missing-fragment-target", `${anchor.text} -> ${href}`);
+        continue;
+      }
       if (/^mailto:/i.test(href)) {
         if (!/email|e-mail|@/i.test(anchor.text)) addIssue("medium", route, "unexpected-mailto", `${anchor.text} -> ${href}`);
         continue;
@@ -161,11 +170,7 @@ try {
         if ((href.match(/\d/g) || []).length < 10) addIssue("high", route, "invalid-tel", `${anchor.text} -> ${href}`);
         continue;
       }
-      if (/^(?:sms:)/i.test(href)) continue;
-      if (href.startsWith("#")) {
-        if (href.length > 1 && !document?.querySelector) {}
-        continue;
-      }
+      if (/^sms:/i.test(href)) continue;
       const url = cleanUrl(anchor.absoluteHref || href);
       if (!url) {
         addIssue("high", route, "invalid-url", `${anchor.text} -> ${href}`);
@@ -179,8 +184,7 @@ try {
       if (!button.visible) continue;
       if (!button.text) addIssue("high", route, "unnamed-button", `button index ${button.i}`);
       if (button.fontSize && button.fontSize < 12) addIssue("medium", route, "tiny-button-text", `${button.text} = ${button.fontSize}px`);
-      const type = (button.type || "").toLowerCase();
-      if (type === "submit" && !button.inForm) addIssue("critical", route, "orphan-submit", button.text);
+      if ((button.type || "").toLowerCase() === "submit" && !button.inForm) addIssue("critical", route, "orphan-submit", button.text);
     }
 
     for (const form of desktop.forms) {
@@ -206,7 +210,6 @@ try {
       if (sectionOrder !== 1) addIssue("high", route, "contact-form-order", `form block index ${sectionOrder}, expected 1`);
     }
 
-    // Mobile pass on every page: overflow and every visible disclosure/menu control must actually toggle.
     await page.setViewportSize({ width: 390, height: 844 });
     await page.reload({ waitUntil: "domcontentloaded", timeout: 30000 });
     await page.waitForTimeout(250);
@@ -228,7 +231,6 @@ try {
       }
     }
 
-    // Desktop disclosure controls such as SERVICES / RESOURCES.
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.reload({ waitUntil: "domcontentloaded", timeout: 30000 });
     await page.waitForTimeout(200);
@@ -236,7 +238,7 @@ try {
     for (let i = 0; i < summaryCount; i++) {
       const summary = page.locator("summary").nth(i);
       if (!await summary.isVisible()) continue;
-      const details = summary.locator("xpath=.. ");
+      const details = summary.locator("xpath=..");
       const before = await details.getAttribute("open");
       try {
         await summary.click({ timeout: 5000 });
@@ -247,17 +249,13 @@ try {
       }
     }
 
-    // Only count same-origin failures from page resource activity. Third-party privacy/analytics blocks are not site breakage.
     const sameOriginFailures = failedRequests.filter((item) => item.startsWith(BASE));
     if (sameOriginFailures.length) addIssue("high", route, "failed-same-origin-request", JSON.stringify(sameOriginFailures.slice(0, 10)));
     const meaningfulConsoleErrors = consoleErrors.filter((text) => !/turnstile|google|analytics|favicon/i.test(text));
     if (meaningfulConsoleErrors.length) addIssue("medium", route, "console-error", JSON.stringify(meaningfulConsoleErrors.slice(0, 10)));
 
     pageResults.push({
-      route,
-      status,
-      finalUrl: desktop.finalUrl,
-      title: desktop.title,
+      route, status, finalUrl: desktop.finalUrl, title: desktop.title,
       anchors: desktop.anchors.length,
       visibleAnchors: desktop.anchors.filter((a) => a.visible).length,
       buttonLikeAnchors: desktop.anchors.filter((a) => a.visible && a.buttonLike).length,
@@ -277,7 +275,6 @@ try {
     if (redirects > 1) addIssue("medium", "GLOBAL", "multi-hop-internal-redirect", `${target} :: ${JSON.stringify(result.chain)}`);
   }
 
-  // External destinations used as button-like CTAs are checked too, but 401/403/429 are reported as warnings, not broken-site errors.
   const externalChecks = [];
   for (const target of [...externalButtonTargets].sort()) {
     const result = await checkUrl(target);
