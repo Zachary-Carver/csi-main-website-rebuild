@@ -82,7 +82,9 @@ try {
         const r = el.getBoundingClientRect();
         return s.display !== "none" && s.visibility !== "hidden" && Number(s.opacity) > 0 && r.width > 0 && r.height > 0;
       };
-      const labelFor = (el) => (el.innerText || el.textContent || el.getAttribute("aria-label") || el.getAttribute("title") || "").replace(/\s+/g, " ").trim();
+      const labelFor = (el) => [el.innerText, el.textContent, el.getAttribute("aria-label"), el.getAttribute("title")]
+        .map((value) => (value || "").replace(/\s+/g, " ").trim())
+        .find(Boolean) || "";
       const anchors = [...document.querySelectorAll("a")].map((el, i) => {
         const rawHref = el.getAttribute("href") || "";
         let fragmentExists = true;
