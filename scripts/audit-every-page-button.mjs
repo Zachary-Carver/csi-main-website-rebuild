@@ -167,7 +167,8 @@ try {
         continue;
       }
       if (/^tel:/i.test(href)) {
-        if ((href.match(/\d/g) || []).length < 10) addIssue("high", route, "invalid-tel", `${anchor.text} -> ${href}`);
+        const digits = (href.match(/\d/g) || []).join("");
+        if (digits.length < 10 && !["911", "988"].includes(digits)) addIssue("high", route, "invalid-tel", `${anchor.text} -> ${href}`);
         continue;
       }
       if (/^sms:/i.test(href)) continue;
@@ -254,7 +255,7 @@ try {
     const sameOriginFailures = failedRequests.filter((item) => item.startsWith(BASE));
     if (sameOriginFailures.length) addIssue("high", route, "failed-same-origin-request", JSON.stringify(sameOriginFailures.slice(0, 10)));
     const meaningfulConsoleErrors = consoleErrors.filter((text) => !/turnstile|google|analytics|favicon/i.test(text));
-    if (meaningfulConsoleErrors.length) addIssue("medium", route, "console-error", JSON.stringify(meaningfulConsoleErrors.slice(0, 10)));
+    if (!expected404 && meaningfulConsoleErrors.length) addIssue("medium", route, "console-error", JSON.stringify(meaningfulConsoleErrors.slice(0, 10)));
 
     pageResults.push({
       route, status, finalUrl: desktop.finalUrl, title: desktop.title,
