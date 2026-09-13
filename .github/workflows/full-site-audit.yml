@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/audit-production-exhaustive.mjs'
+      - 'scripts/audit-cookie-controls.mjs'
       - '.github/workflows/full-site-audit.yml'
   workflow_dispatch:
 
@@ -14,7 +15,7 @@ permissions:
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -33,6 +34,11 @@ jobs:
         continue-on-error: true
         run: node scripts/audit-production-exhaustive.mjs https://cleansceneinvestigators.com
 
+      - name: Click cookie accept and decline on every live page
+        id: cookies
+        continue-on-error: true
+        run: node scripts/audit-cookie-controls.mjs https://cleansceneinvestigators.com
+
       - name: Upload audit report
         if: always()
         uses: actions/upload-artifact@v4
@@ -41,6 +47,6 @@ jobs:
           path: production-exhaustive-audit.json
           if-no-files-found: error
 
-      - name: Fail on critical or high issues
-        if: steps.audit.outcome == 'failure'
+      - name: Fail on critical/high or interaction failures
+        if: steps.audit.outcome == 'failure' || steps.cookies.outcome == 'failure'
         run: exit 1
