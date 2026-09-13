@@ -28,6 +28,8 @@ jobs:
           npm install --no-save playwright
           npx playwright install --with-deps chromium
 
+      # This run audits the live production site after the Christina portfolio
+      # destination was migrated from Vercel to Cloudflare.
       - name: Audit every live page, link, button and form
         id: audit
         continue-on-error: true
