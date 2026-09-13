@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'scripts/audit-every-page-button.mjs'
+      - 'scripts/audit-production-exhaustive.mjs'
       - '.github/workflows/full-site-audit.yml'
   workflow_dispatch:
 
@@ -28,19 +28,17 @@ jobs:
           npm install --no-save playwright
           npx playwright install --with-deps chromium
 
-      # This run audits the live production site after the Christina portfolio
-      # destination was migrated from Vercel to Cloudflare.
-      - name: Audit every live page, link, button and form
+      - name: Audit every live page, link, button, form and loaded resource
         id: audit
         continue-on-error: true
-        run: node scripts/audit-every-page-button.mjs https://cleansceneinvestigators.com
+        run: node scripts/audit-production-exhaustive.mjs https://cleansceneinvestigators.com
 
       - name: Upload audit report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: csi-full-site-audit
-          path: full-site-audit.json
+          name: csi-production-exhaustive-audit
+          path: production-exhaustive-audit.json
           if-no-files-found: error
 
       - name: Fail on critical or high issues
