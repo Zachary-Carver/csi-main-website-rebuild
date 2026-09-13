@@ -2,8 +2,8 @@
 """Strengthen CSI geographic SEO around Dallas-Fort Worth, DFW, and North Texas.
 
 Idempotent, dependency-free, and safe for the migrated static site. It updates metadata
-on core regional/service/city pages and injects one visible regional context block plus
-supplemental geographic WebPage schema without changing page layout or URLs.
+on core regional/service/city pages and injects one styled regional context panel plus
+supplemental geographic WebPage schema without changing page URLs.
 """
 from __future__ import annotations
 
@@ -22,6 +22,7 @@ SECONDARY_REGION = "North Texas"
 SKIP = {"home/index.html", "ols/products/index.html"}
 GEO_BLOCK = re.compile(r"\n?<!-- CSI GEO SEO START -->.*?<!-- CSI GEO SEO END -->\n?", re.S)
 GEO_SCHEMA = re.compile(r"\n?<!-- CSI GEO SCHEMA START -->.*?<!-- CSI GEO SCHEMA END -->\n?", re.S)
+GEO_STYLE = re.compile(r"\n?<!-- CSI GEO STYLE START -->.*?<!-- CSI GEO STYLE END -->\n?", re.S)
 
 SERVICE_META = {
     "crime-scene-cleaning-dfw": (
@@ -121,30 +122,207 @@ def city_from_rel(rel: str) -> str | None:
 
 
 def geo_links_for_region() -> str:
-    cities = " · ".join(f'<a href="{url}">{name}</a>' for name, url in TOP_CITIES)
+    cities = "".join(
+        f'<a href="{url}">{html.escape(name)}</a>' for name, url in TOP_CITIES
+    )
     return (
-        '<p><strong>Dallas-Fort Worth Metroplex service area:</strong> CSI provides 24/7 crime scene, trauma and biohazard cleanup '
-        f'throughout DFW and {SECONDARY_REGION}, including {cities} and surrounding communities.</p>'
-        '<p><a href="/service-areas-in-texas/">Explore DFW &amp; North Texas service areas</a> · '
-        '<a href="/crime-scene-cleaning-dfw/">Crime scene cleanup across DFW</a> · '
-        '<a href="/biohazard-cleanup-in-dfw/">Biohazard cleanup across DFW</a></p>'
+        '<section class="csi-geo-seo" data-csi-geo-seo="true" aria-label="Dallas-Fort Worth and North Texas service area">'
+        '<div class="csi-geo-seo__header">'
+        '<p class="csi-geo-seo__eyebrow">DFW &amp; North Texas service area</p>'
+        '<h3 class="csi-geo-seo__title">24/7 response across the Dallas-Fort Worth Metroplex.</h3>'
+        '<p class="csi-geo-seo__copy">CSI provides specialized crime scene, trauma and biohazard cleanup throughout DFW and North Texas, including Dallas, Fort Worth, Denton, Plano, Frisco, Arlington, Irving, McKinney and surrounding communities.</p>'
+        '</div>'
+        f'<nav class="csi-geo-seo__cities" aria-label="Featured DFW service areas">{cities}</nav>'
+        '<nav class="csi-geo-seo__links" aria-label="Regional cleanup services">'
+        '<a href="/service-areas-in-texas/">Explore all service areas</a>'
+        '<a href="/crime-scene-cleaning-dfw/">Crime scene cleanup across DFW</a>'
+        '<a href="/biohazard-cleanup-in-dfw/">Biohazard cleanup across DFW</a>'
+        '</nav>'
+        '</section>'
     )
 
 
 def geo_links_for_city(city: str) -> str:
+    safe_city = html.escape(city)
     return (
-        f'<p><strong>{html.escape(city)}, Texas is served within CSI\'s Dallas-Fort Worth (DFW) Metroplex and North Texas response area.</strong> '
-        'CSI provides 24/7 crime scene, trauma, blood, unattended death, decomposition and biohazard cleanup after the scene is released.</p>'
-        '<p><a href="/service-areas-in-texas/">Dallas-Fort Worth service areas</a> · '
-        '<a href="/crime-scene-cleaning-dfw/">DFW crime scene cleanup</a> · '
-        '<a href="/unattended-death-cleanup/">DFW unattended death cleanup</a> · '
-        '<a href="/biohazard-cleanup-in-dfw/">DFW biohazard cleanup</a></p>'
+        '<section class="csi-geo-seo" data-csi-geo-seo="true" aria-label="Local Dallas-Fort Worth service area">'
+        '<div class="csi-geo-seo__header">'
+        '<p class="csi-geo-seo__eyebrow">Local service area</p>'
+        f'<h3 class="csi-geo-seo__title">{safe_city}, Texas</h3>'
+        f'<p class="csi-geo-seo__copy">{safe_city} is served within CSI\'s Dallas-Fort Worth Metroplex and North Texas response area. CSI provides 24/7 crime scene, trauma, blood, unattended death, decomposition and biohazard cleanup after the scene is released.</p>'
+        '</div>'
+        '<nav class="csi-geo-seo__links" aria-label="Dallas-Fort Worth cleanup resources">'
+        '<a href="/service-areas-in-texas/">Dallas-Fort Worth service areas</a>'
+        '<a href="/crime-scene-cleaning-dfw/">DFW crime scene cleanup</a>'
+        '<a href="/unattended-death-cleanup/">DFW unattended death cleanup</a>'
+        '<a href="/biohazard-cleanup-in-dfw/">DFW biohazard cleanup</a>'
+        '</nav>'
+        '</section>'
     )
+
+
+def inject_geo_styles(source: str) -> str:
+    source = GEO_STYLE.sub("", source)
+    css = r'''
+<!-- CSI GEO STYLE START -->
+<style>
+  .csi-geo-seo,
+  .csi-geo-seo * {
+    box-sizing: border-box;
+  }
+
+  .csi-geo-seo {
+    --csi-geo-black: #000000;
+    --csi-geo-panel: #171717;
+    --csi-geo-gold: #c9a227;
+    --csi-geo-gold-light: #e7cf76;
+    --csi-geo-white: #ffffff;
+    --csi-geo-muted: #c2c2c2;
+    --csi-geo-line: rgba(201, 162, 39, 0.27);
+
+    width: min(1180px, 100%);
+    margin: 42px auto 0;
+    padding: 28px 0 2px;
+    border-top: 1px solid var(--csi-geo-line);
+    color: var(--csi-geo-white);
+    background: transparent;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: left;
+  }
+
+  .csi-geo-seo__header {
+    max-width: 920px;
+  }
+
+  .csi-geo-seo__eyebrow {
+    margin: 0 0 9px;
+    color: var(--csi-geo-gold-light) !important;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    line-height: 1.5;
+    text-transform: uppercase;
+  }
+
+  .csi-geo-seo__title {
+    margin: 0;
+    color: var(--csi-geo-white) !important;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(23px, 2.8vw, 34px);
+    font-weight: 400;
+    letter-spacing: -0.025em;
+    line-height: 1.12;
+  }
+
+  .csi-geo-seo__copy {
+    max-width: 900px;
+    margin: 11px 0 0;
+    color: var(--csi-geo-muted) !important;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  .csi-geo-seo__cities {
+    margin-top: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .csi-geo-seo__cities a {
+    min-height: 36px;
+    padding: 9px 11px;
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--csi-geo-line);
+    border-radius: 2px;
+    color: var(--csi-geo-gold-light) !important;
+    background: rgba(23, 23, 23, 0.96);
+    font-size: 10px !important;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+    text-decoration: none !important;
+    text-transform: uppercase;
+    transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+  }
+
+  .csi-geo-seo__cities a:hover,
+  .csi-geo-seo__cities a:focus-visible {
+    color: var(--csi-geo-black) !important;
+    background: var(--csi-geo-gold);
+    border-color: var(--csi-geo-gold);
+    transform: translateY(-1px);
+  }
+
+  .csi-geo-seo__links {
+    margin-top: 18px;
+    padding-top: 17px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+    border-top: 1px solid rgba(201, 162, 39, 0.16);
+  }
+
+  .csi-geo-seo__links a {
+    color: var(--csi-geo-gold-light) !important;
+    font-size: 10px !important;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    line-height: 1.55;
+    text-decoration: none !important;
+    text-transform: uppercase;
+  }
+
+  .csi-geo-seo__links a:hover,
+  .csi-geo-seo__links a:focus-visible {
+    color: var(--csi-geo-white) !important;
+    text-decoration: underline !important;
+    text-decoration-color: var(--csi-geo-gold) !important;
+    text-underline-offset: 5px;
+  }
+
+  .csi-geo-seo a:focus-visible {
+    outline: 2px solid var(--csi-geo-gold);
+    outline-offset: 4px;
+  }
+
+  @media (max-width: 590px) {
+    .csi-geo-seo {
+      margin-top: 32px;
+      padding-top: 24px;
+    }
+
+    .csi-geo-seo__cities {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .csi-geo-seo__cities a {
+      justify-content: center;
+      text-align: center;
+    }
+
+    .csi-geo-seo__links {
+      display: grid;
+      gap: 12px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .csi-geo-seo__cities a {
+      transition: none;
+    }
+  }
+</style>
+<!-- CSI GEO STYLE END -->
+'''
+    return source.replace("</head>", css + "\n</head>", 1)
 
 
 def inject_geo_block(source: str, inner: str) -> str:
     source = GEO_BLOCK.sub("", source)
-    block = '\n<!-- CSI GEO SEO START --><div class="wrap csi-geo-seo" data-csi-geo-seo="true">' + inner + '</div><!-- CSI GEO SEO END -->\n'
+    block = "\n<!-- CSI GEO SEO START -->" + inner + "<!-- CSI GEO SEO END -->\n"
     if "</footer>" in source:
         return source.replace("</footer>", block + "</footer>", 1)
     return source.replace("</body>", block + "</body>", 1)
@@ -236,6 +414,7 @@ def apply(path: Path) -> bool:
         source = set_meta(source, "name", "geo.placename", f"{city}, Texas" if city else REGION_SCHEMA)
         page_url = canonical(source) or (SITE + "/")
         source = inject_geo_schema(source, page_url, city)
+        source = inject_geo_styles(source)
         source = inject_geo_block(source, geo_links_for_city(city) if city else geo_links_for_region())
 
     if source != original:
@@ -244,14 +423,14 @@ def apply(path: Path) -> bool:
     return False
 
 
-def main() -> None:
+def main() -> int:
     changed = 0
-    for path in ROOT.rglob("*.html"):
-        if ".git" in path.parts or "_site" in path.parts:
-            continue
-        changed += int(apply(path))
-    print(f"Geographic SEO strengthened on {changed} HTML files.")
+    for path in sorted(ROOT.rglob("index.html")):
+        if apply(path):
+            changed += 1
+    print(f"Geographic SEO updates applied to {changed} pages.")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
