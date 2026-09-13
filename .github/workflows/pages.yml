@@ -35,6 +35,7 @@ jobs:
           python scripts/fix_img_markup.py
           python scripts/apply_layout_cleanup.py
           python scripts/normalize_inquiry_links.py
+          python scripts/normalize_christina_portfolio_links.py
 
       - name: Persist normalized source to main
         shell: bash
