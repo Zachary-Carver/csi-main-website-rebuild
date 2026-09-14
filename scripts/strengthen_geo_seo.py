@@ -343,7 +343,7 @@ def inject_geo_schema(source: str, page_url: str, city: str | None) -> str:
         "@id": page_url + "#geographic-service-area",
         "url": page_url,
         "spatialCoverage": coverage,
-        "about": {"@type": "Organization", "name": "CSI: Clean Scene Investigators", "url": SITE + "/"},
+        "about": {"@id": SITE + "/#organization"},
     }
     block = '\n<!-- CSI GEO SCHEMA START --><script type="application/ld+json" data-csi-geo-schema="true">' + json.dumps(payload, separators=(",", ":"), ensure_ascii=False) + '</script><!-- CSI GEO SCHEMA END -->\n'
     return source.replace("</head>", block + "</head>", 1)

@@ -3,10 +3,8 @@ name: Full live page and button audit
 on:
   push:
     branches: [main]
-    paths:
-      - 'scripts/audit-production-exhaustive.mjs'
-      - 'scripts/audit-cookie-controls.mjs'
-      - '.github/workflows/full-site-audit.yml'
+  schedule:
+    - cron: '17 8 * * *'
   workflow_dispatch:
 
 permissions:
