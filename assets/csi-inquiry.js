@@ -74,7 +74,7 @@
       <div class="csi-inquiry-page__field"><label for="csi-inquiry-method">Preferred contact method</label><select id="csi-inquiry-method" name="method"><option value="">Select a method</option><option>Phone</option><option>Email</option><option>Text message</option></select></div>
       <div class="csi-inquiry-page__field"><label for="csi-inquiry-organization">Organization (optional)</label><input id="csi-inquiry-organization" name="organization" type="text" autocomplete="organization" maxlength="160"></div>
       <div class="csi-inquiry-page__field csi-inquiry-page__field--wide"><label for="csi-inquiry-message">How can we help?</label><textarea id="csi-inquiry-message" name="message" maxlength="4000" required></textarea></div></div>
-      <div class="csi-inquiry-hp" aria-hidden="true"><label for="csi-inquiry-company">Company website</label><input id="csi-inquiry-company" name="company_website" type="text" tabindex="-1" autocomplete="off"></div><div class="csi-turnstile-wrap"><div class="cf-turnstile" data-theme="dark"></div></div><p class="csi-turnstile-note">This form uses Cloudflare Turnstile for abuse prevention and Resend for secure email delivery. See our <a href="/privacy-policy/">Privacy Policy</a>.</p><button class="csi-combined-contact__button" type="submit">Submit confidential inquiry</button><p id="csi-dedicated-contact-status" class="csi-contact-status" role="status" aria-live="polite"></p></form></div></div>`;
+      <div class="csi-inquiry-hp" aria-hidden="true"><label for="csi-inquiry-company">Company website</label><input id="csi-inquiry-company" name="company_website" type="text" tabindex="-1" autocomplete="off"></div><div class="csi-turnstile-wrap"><div class="cf-turnstile" data-theme="dark"></div></div><p class="csi-turnstile-note">This form uses Cloudflare Turnstile for abuse prevention and Resend for secure email delivery. See our <a href="/privacy-policy/">Privacy Policy</a>.</p><button class="csi-combined-contact__button" type="submit" disabled>Submit confidential inquiry</button><p id="csi-dedicated-contact-status" class="csi-contact-status" role="status" aria-live="polite"></p></form></div></div>`;
     const page = document.querySelector(".csi-contact-page"), first = page?.querySelector("section.csi-contact-section");
     if (page && first?.parentNode === page) first.insertAdjacentElement("afterend", section);
     else { const footer = document.querySelector('.widget-footer, [role="contentinfo"]'); footer?.parentNode ? footer.parentNode.insertBefore(section, footer) : document.body.appendChild(section); }
@@ -98,15 +98,21 @@
     const type = form.elements.inquiry_type, service = form.elements.service, phone = form.elements.phone, email = form.elements.email;
     const location = form.elements.location, method = form.elements.method, serviceField = document.getElementById("csi-service-field");
     const status = document.getElementById("csi-dedicated-contact-status"), submit = form.querySelector('button[type="submit"]'), host = form.querySelector(".cf-turnstile");
-    let siteKey = "", widgetId, renderedAction = "";
+    let siteKey = "", widgetId, renderedAction = "", securityReady = false;
     const action = () => type.value === "cleanup" ? "contact" : "professional-inquiry";
     function renderTurnstile() {
       const next = action(); if (!siteKey || !window.turnstile || next === renderedAction) return;
       if (widgetId !== undefined) window.turnstile.remove(widgetId); host.replaceChildren();
-      widgetId = window.turnstile.render(host, { sitekey: siteKey, theme: "dark", action: next }); renderedAction = next;
+      securityReady = false; submit.disabled = true;
+      widgetId = window.turnstile.render(host, {
+        sitekey: siteKey, theme: "dark", action: next,
+        callback: () => { securityReady = true; submit.disabled = false; },
+        "expired-callback": () => { securityReady = false; submit.disabled = true; },
+        "error-callback": () => { securityReady = false; submit.disabled = true; status.dataset.state = "error"; status.textContent = "Online security verification is temporarily unavailable. Please call 940-654-6334."; }
+      }); renderedAction = next;
     }
     function updateMode() {
-      const cleanup = type.value === "cleanup"; serviceField.hidden = !cleanup;
+      const cleanup = type.value === "cleanup"; serviceField.hidden = !cleanup; securityReady = false; submit.disabled = true;
       service.required = cleanup; phone.required = cleanup; location.required = cleanup; method.required = cleanup; email.required = !cleanup;
       form.action = cleanup ? "/api/contact" : "/api/professional-inquiry";
       submit.textContent = cleanup ? "Submit confidential inquiry" : "Submit inquiry";
@@ -115,6 +121,7 @@
     type.addEventListener("change", updateMode); updateMode(); loadTurnstile(status).then((key) => { siteKey = key; renderTurnstile(); });
     form.addEventListener("submit", async (event) => {
       event.preventDefault(); if (!form.reportValidity()) return;
+      if (!securityReady) { status.dataset.state = "error"; status.textContent = "Please wait for the security check to finish."; return; }
       const chosen = type.value, defaultLabel = submit.textContent; submit.disabled = true; submit.textContent = "Sending…"; status.dataset.state = "sending"; status.textContent = "Sending your inquiry…";
       try {
         const body = new FormData(form); if (chosen !== "cleanup") body.set("request_type", PROFESSIONAL_TYPES[chosen]);
