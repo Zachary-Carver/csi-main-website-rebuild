@@ -189,6 +189,18 @@
     const archive = document.querySelector(".csi-blog-archive");
     if (!archive) return;
 
+    const grid = archive.querySelector(".csi-blog-grid");
+    const womenInPowerHref = "/follow-us/f/christina-hester-women-in-power-tv/";
+    if (grid && !grid.querySelector(`a[href="${womenInPowerHref}"]`)) {
+      const card = document.createElement("article");
+      card.className = "csi-blog-card";
+      card.innerHTML = `
+        <h3><a href="${womenInPowerHref}">From Crime Scenes to Clean Scenes: Christina Hester Featured on Women in Power TV</a></h3>
+        <p>CSI founder Christina Hester shares her journey from homicide victim’s family member to Crime Scene Investigator and Dallas-Fort Worth crime scene cleanup CEO on Women in Power TV.</p>
+        <a class="csi-blog-read" href="${womenInPowerHref}">Read the story →</a>`;
+      grid.prepend(card);
+    }
+
     const titleCorrections = new Map([
       [
         "/follow-us/f/247-crime-scene-biohazard-cleanup-in-dfw-%7C-csi-clean-scene-in",
