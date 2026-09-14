@@ -19,7 +19,7 @@ PROFESSIONAL_TARGETS = {
     "request vendor information": "vendor",
     "request company documentation": "documentation",
 }
-SCRIPT = '<script defer src="/assets/csi-inquiry.js?v=20260912-professional-closeout"></script>'
+SCRIPT = '<script defer src="/assets/csi-inquiry.js?v=20260914-unified-contact"></script>'
 SCRIPT_RE = re.compile(r'<script\b[^>]*src=["\']/assets/csi-inquiry\.js(?:\?[^"\']*)?["\'][^>]*></script>', re.I)
 ANCHOR_RE = re.compile(
     r'<a\b(?P<attrs>[^>]*\bhref=(?P<quote>["\'])mailto:[^"\']*(?P=quote)[^>]*)>(?P<body>.*?)</a>',
@@ -68,7 +68,7 @@ def rewrite_professional_anchor(match: re.Match[str]) -> str:
     request_type = PROFESSIONAL_TARGETS.get(label)
     if not request_type:
         return match.group(0)
-    target = f"/contact-us/?inquiry={request_type}#professional-inquiry-form"
+    target = f"/contact-us/?inquiry={request_type}#confidential-inquiry-form"
     attrs = re.sub(
         r'\bhref=(["\'])[^"\']*\1',
         f'href="{target}"',
