@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   audit:
@@ -16,6 +16,21 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+
+      - name: Apply precision SEO metadata and schema updates
+        run: python scripts/apply_precision_seo.py
+
+      - name: Commit precision SEO updates when needed
+        run: |
+          if git diff --quiet; then
+            echo "Precision SEO already applied; no source changes needed."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add dallas-tx-response/index.html fort-worth-tx-response/index.html service-areas-in-texas/index.html sitemap.website.xml
+            git commit -m "Apply precision Dallas Fort Worth SEO updates"
+            git push
+          fi
 
       - uses: actions/setup-node@v4
         with:
