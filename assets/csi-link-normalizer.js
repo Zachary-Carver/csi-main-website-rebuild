@@ -4,6 +4,7 @@
   const routes = new Map([
     ["/insurance-&-payment-help", "/insurance-payment-help/"],
     ["/media,-speaking-&-press", "/media-speaking-press/"],
+    ["/property-manager/landlord-1", "/property-manager/landlord-1/"],
     ["/follow-us/f/247-crime-scene-biohazard-cleanup-in-dfw-|-csi-clean-scene-in", "/follow-us/f/247-crime-scene-biohazard-cleanup-dfw/"],
     ["/follow-us/f/some-people-think-“cleaning”-is-just-wiping-surfaces…", "/follow-us/f/some-people-think-cleaning-is-just-wiping-surfaces/"],
     ["/follow-us/f/spring-cleaning-isn’t-enough-here’s-what-your-home-actually-need", "/follow-us/f/spring-cleaning-isnt-enough-heres-what-your-home-actually-needs/"],
@@ -23,9 +24,11 @@
     try {
       const url = new URL(raw, window.location.href);
       if (url.origin !== window.location.origin) return raw;
-      const mapped = routes.get(stripSlash(decode(url.pathname)));
-      if (!mapped) return raw;
-      url.pathname = mapped;
+      const slashDecoded = url.pathname.replace(/%2f/ig, "/").replace(/\/{2,}/g, "/");
+      const mapped = routes.get(stripSlash(decode(slashDecoded)));
+      const cleaned = mapped || slashDecoded;
+      if (cleaned === url.pathname) return raw;
+      url.pathname = cleaned;
       return /^https?:/i.test(raw) ? url.toString() : `${url.pathname}${url.search}${url.hash}`;
     } catch {
       return raw;
