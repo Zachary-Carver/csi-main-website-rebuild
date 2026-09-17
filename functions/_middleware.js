@@ -3,7 +3,8 @@ const SITE_ORIGIN = "https://cleansceneinvestigators.com";
 const LEGACY_ROUTE_MAP = new Map([
   ["/insurance-&-payment-help", "/insurance-payment-help/"],
   ["/media,-speaking-&-press", "/media-speaking-press/"],
-  ["/property-manager/landlord-1", "/property-manager/landlord/"],
+  ["/property-manager/landlord-1", "/property-manager-landlord/"],
+  ["/property-manager/landlord", "/property-manager-landlord/"],
   ["/follow-us/f/247-crime-scene-biohazard-cleanup-in-dfw-|-csi-clean-scene-in", "/follow-us/f/247-crime-scene-biohazard-cleanup-dfw/"],
   ["/follow-us/f/some-people-think-“cleaning”-is-just-wiping-surfaces…", "/follow-us/f/some-people-think-cleaning-is-just-wiping-surfaces/"],
   ["/follow-us/f/spring-cleaning-isn’t-enough-here’s-what-your-home-actually-need", "/follow-us/f/spring-cleaning-isnt-enough-heres-what-your-home-actually-needs/"],
@@ -20,9 +21,12 @@ const RAW_ROUTE_REPLACEMENTS = [
   ["/media%2C-speaking-%26-press", "/media-speaking-press/"],
   ["/media,-speaking-&amp;-press", "/media-speaking-press/"],
   ["/media,-speaking-&-press", "/media-speaking-press/"],
-  ["/property-manager%2Flandlord-1", "/property-manager/landlord/"],
-  ["/property-manager%2flandlord-1", "/property-manager/landlord/"],
-  ["/property-manager/landlord-1", "/property-manager/landlord/"],
+  ["/property-manager%2Flandlord-1", "/property-manager-landlord/"],
+  ["/property-manager%2flandlord-1", "/property-manager-landlord/"],
+  ["/property-manager/landlord-1", "/property-manager-landlord/"],
+  ["/property-manager%2Flandlord", "/property-manager-landlord/"],
+  ["/property-manager%2flandlord", "/property-manager-landlord/"],
+  ["/property-manager/landlord", "/property-manager-landlord/"],
   ["/follow-us/f/247-crime-scene-biohazard-cleanup-in-dfw-%7C-csi-clean-scene-in", "/follow-us/f/247-crime-scene-biohazard-cleanup-dfw/"],
   ["/follow-us/f/247-crime-scene-biohazard-cleanup-in-dfw-|-csi-clean-scene-in", "/follow-us/f/247-crime-scene-biohazard-cleanup-dfw/"],
   ["/follow-us/f/some-people-think-“cleaning”-is-just-wiping-surfaces…", "/follow-us/f/some-people-think-cleaning-is-just-wiping-surfaces/"],
@@ -105,7 +109,7 @@ class ContentUrlCleaner {
 
 class BodyScriptInjector {
   element(element) {
-    element.append('<script src="/assets/csi-link-normalizer.js" defer></script>', { html: true });
+    element.append('<script src="/assets/csi-link-normalizer.js" defer></script><script src="/assets/csi-layout-fix.js" defer></script>', { html: true });
   }
 }
 
