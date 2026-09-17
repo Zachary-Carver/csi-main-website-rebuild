@@ -12,6 +12,25 @@ const LEGACY_ROUTE_MAP = new Map([
   ["/follow-us/f/🚨-this-is-why-you-don’t-clean-it-yourself-🚨", "/follow-us/f/this-is-why-you-dont-clean-it-yourself/"]
 ]);
 
+const RAW_ROUTE_REPLACEMENTS = [
+  ["/insurance-%26-payment-help", "/insurance-payment-help/"],
+  ["/insurance-&amp;-payment-help", "/insurance-payment-help/"],
+  ["/insurance-&-payment-help", "/insurance-payment-help/"],
+  ["/media%2C-speaking-%26-press", "/media-speaking-press/"],
+  ["/media,-speaking-&amp;-press", "/media-speaking-press/"],
+  ["/media,-speaking-&-press", "/media-speaking-press/"],
+  ["/follow-us/f/247-crime-scene-biohazard-cleanup-in-dfw-%7C-csi-clean-scene-in", "/follow-us/f/247-crime-scene-biohazard-cleanup-dfw/"],
+  ["/follow-us/f/247-crime-scene-biohazard-cleanup-in-dfw-|-csi-clean-scene-in", "/follow-us/f/247-crime-scene-biohazard-cleanup-dfw/"],
+  ["/follow-us/f/some-people-think-“cleaning”-is-just-wiping-surfaces…", "/follow-us/f/some-people-think-cleaning-is-just-wiping-surfaces/"],
+  ["/follow-us/f/spring-cleaning-isn’t-enough-here’s-what-your-home-actually-need", "/follow-us/f/spring-cleaning-isnt-enough-heres-what-your-home-actually-needs/"],
+  ["/follow-us/f/unattended-death-cleanup-denton-tx-%7C-csi-clean-scene-investigator", "/follow-us/f/unattended-death-cleanup-denton-tx/"],
+  ["/follow-us/f/unattended-death-cleanup-denton-tx-|-csi-clean-scene-investigator", "/follow-us/f/unattended-death-cleanup-denton-tx/"],
+  ["/follow-us/f/when-the-crime-scene-is-over-the-biohazard-risk-isn’t", "/follow-us/f/when-the-crime-scene-is-over-the-biohazard-risk-isnt/"],
+  ["/follow-us/f/who-cleans-up-after-a-crime-scene-in-texas-%7C-csi", "/follow-us/f/who-cleans-up-after-a-crime-scene-in-texas/"],
+  ["/follow-us/f/who-cleans-up-after-a-crime-scene-in-texas-|-csi", "/follow-us/f/who-cleans-up-after-a-crime-scene-in-texas/"],
+  ["/follow-us/f/🚨-this-is-why-you-don’t-clean-it-yourself-🚨", "/follow-us/f/this-is-why-you-dont-clean-it-yourself/"]
+];
+
 function withoutTrailingSlash(pathname) {
   if (pathname === "/") return pathname;
   return pathname.replace(/\/+$/, "");
@@ -43,6 +62,14 @@ function cleanInternalUrl(value, requestUrl) {
   } catch {
     return value;
   }
+}
+
+function replaceLegacyRoutes(text) {
+  let output = text;
+  for (const [legacy, clean] of RAW_ROUTE_REPLACEMENTS) {
+    output = output.split(legacy).join(clean);
+  }
+  return output;
 }
 
 class HrefCleaner {
@@ -83,13 +110,26 @@ export async function onRequest(context) {
   }
 
   const response = await context.next();
-  const contentType = response.headers.get("content-type") || "";
-  if (!contentType.toLowerCase().includes("text/html")) return response;
+  const contentType = (response.headers.get("content-type") || "").toLowerCase();
+  const isHtml = contentType.includes("text/html");
+  const isXml = contentType.includes("xml") || requestUrl.pathname.endsWith(".xml");
+  if (!isHtml && !isXml) return response;
+
+  const headers = new Headers(response.headers);
+  headers.delete("content-length");
+  const cleanedBody = replaceLegacyRoutes(await response.text());
+  const cleanedResponse = new Response(cleanedBody, {
+    status: response.status,
+    statusText: response.statusText,
+    headers
+  });
+
+  if (!isHtml) return cleanedResponse;
 
   return new HTMLRewriter()
     .on("a[href]", new HrefCleaner(context.request.url))
     .on('link[rel="canonical"][href]', new HrefCleaner(context.request.url))
     .on('meta[property="og:url"][content]', new ContentUrlCleaner(context.request.url))
     .on("body", new BodyScriptInjector())
-    .transform(response);
+    .transform(cleanedResponse);
 }
