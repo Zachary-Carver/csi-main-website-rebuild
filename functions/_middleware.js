@@ -68,6 +68,7 @@ function replaceLegacyRoutes(text) {
   let output = text;
   for (const [legacy, clean] of RAW_ROUTE_REPLACEMENTS) {
     output = output.split(legacy).join(clean);
+    if (clean.endsWith("/")) output = output.split(clean + "/").join(clean);
   }
   return output;
 }
