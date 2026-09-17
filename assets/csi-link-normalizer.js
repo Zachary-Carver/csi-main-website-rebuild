@@ -4,7 +4,8 @@
   const routes = new Map([
     ["/insurance-&-payment-help", "/insurance-payment-help/"],
     ["/media,-speaking-&-press", "/media-speaking-press/"],
-    ["/property-manager/landlord-1", "/property-manager/landlord/"],
+    ["/property-manager/landlord-1", "/property-manager-landlord/"],
+    ["/property-manager/landlord", "/property-manager-landlord/"],
     ["/follow-us/f/247-crime-scene-biohazard-cleanup-in-dfw-|-csi-clean-scene-in", "/follow-us/f/247-crime-scene-biohazard-cleanup-dfw/"],
     ["/follow-us/f/some-people-think-“cleaning”-is-just-wiping-surfaces…", "/follow-us/f/some-people-think-cleaning-is-just-wiping-surfaces/"],
     ["/follow-us/f/spring-cleaning-isn’t-enough-here’s-what-your-home-actually-need", "/follow-us/f/spring-cleaning-isnt-enough-heres-what-your-home-actually-needs/"],
