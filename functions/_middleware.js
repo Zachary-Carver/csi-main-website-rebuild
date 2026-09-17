@@ -67,6 +67,12 @@ class ContentUrlCleaner {
   }
 }
 
+class BodyScriptInjector {
+  element(element) {
+    element.append('<script src="/assets/csi-link-normalizer.js" defer></script>', { html: true });
+  }
+}
+
 export async function onRequest(context) {
   const requestUrl = new URL(context.request.url);
   const cleanedPath = cleanPathname(requestUrl.pathname);
@@ -84,5 +90,6 @@ export async function onRequest(context) {
     .on("a[href]", new HrefCleaner(context.request.url))
     .on('link[rel="canonical"][href]', new HrefCleaner(context.request.url))
     .on('meta[property="og:url"][content]', new ContentUrlCleaner(context.request.url))
+    .on("body", new BodyScriptInjector())
     .transform(response);
 }
