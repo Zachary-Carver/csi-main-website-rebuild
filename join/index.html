@@ -381,11 +381,11 @@
           <h2>Let’s find the breakthrough.</h2>
           <p class="signup-intro">Join the email list for the Breakthrough Bulletin, first access to workshops and live conversations, new podcast and video drops, reflection prompts, resources, and St;ll Here Society updates.</p>
 
-          <form action="https://formsubmit.co/christina@cleansceneinvestigators.com" method="POST">
+          <form id="signup-form" action="https://formsubmit.co/christina@cleansceneinvestigators.com" method="POST">
             <input type="hidden" name="_subject" value="New Bloodstains & Breakthroughs Signup">
             <input type="hidden" name="_next" value="https://join.cleansceneinvestigators.com/thanks/">
             <input type="hidden" name="Traffic Source" id="traffic-source" value="Direct / unknown">
-            <input type="hidden" name="Campaign" id="campaign" value="">
+            <input type="hidden" name="Campaign" id="campaign" value="">\n            <input type="hidden" name="UTM Medium" id="utm-medium" value="">\n            <input type="hidden" name="UTM Content" id="utm-content" value="">
             <input type="hidden" name="Referrer" id="referrer" value="">
             <input type="hidden" name="Landing URL" id="landing-url" value="">
             <input class="honeypot" type="text" name="_honey" tabindex="-1" autocomplete="off">
@@ -458,11 +458,11 @@
     (function(){
       var params=new URLSearchParams(window.location.search);
       var source=params.get('utm_source')||params.get('source')||params.get('src')||'Direct / unknown';
-      var campaign=params.get('utm_campaign')||'';
+      var campaign=params.get('utm_campaign')||'';\n      var medium=params.get('utm_medium')||'';\n      var content=params.get('utm_content')||'';
       document.getElementById('traffic-source').value=source;
-      document.getElementById('campaign').value=campaign;
+      document.getElementById('campaign').value=campaign;\n      document.getElementById('utm-medium').value=medium;\n      document.getElementById('utm-content').value=content;
       document.getElementById('referrer').value=document.referrer||'Direct';
-      document.getElementById('landing-url').value=window.location.href;
+      document.getElementById('landing-url').value=window.location.href;\n\n      var form=document.getElementById('signup-form');\n      form.addEventListener('submit',function(){\n        try{\n          sessionStorage.setItem('bb_signup_email',form.querySelector('[name="email"]').value||'');\n          sessionStorage.setItem('bb_signup_name',form.querySelector('[name="First Name"]').value||'');\n          sessionStorage.setItem('bb_signup_source',source);\n          sessionStorage.setItem('bb_signup_campaign',campaign);\n        }catch(e){}\n      });
     }());
   </script>
 </body>
