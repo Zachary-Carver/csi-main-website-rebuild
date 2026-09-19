@@ -1,0 +1,58 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://join.cleansceneinvestigators.com/#website",
+      "url": "https://join.cleansceneinvestigators.com/",
+      "name": "Bloodstains & Breakthroughs",
+      "description": "Christina Hester's platform for honest stories, practical reflection, workshops, conversations, and rebuilding after survival mode.",
+      "inLanguage": "en-US",
+      "publisher": {
+        "@id": "https://christina.cleansceneinvestigators.com/#christina-hester"
+      },
+      "creator": {
+        "@id": "https://christina.cleansceneinvestigators.com/#christina-hester"
+      }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://christina.cleansceneinvestigators.com/#christina-hester",
+      "name": "Christina Hester",
+      "url": "https://christina.cleansceneinvestigators.com/",
+      "worksFor": {
+        "@id": "https://cleansceneinvestigators.com/#organization"
+      },
+      "sameAs": [
+        "https://www.linkedin.com/in/christina-hester-676b38223/",
+        "https://www.tiktok.com/@csichristina",
+        "https://www.instagram.com/csichristina/",
+        "https://www.facebook.com/christinakhester",
+        "https://cast.womeninpowertv.com/christina-hester"
+      ]
+    },
+    {
+      "@type": "PodcastSeries",
+      "@id": "https://join.cleansceneinvestigators.com/#bloodstains-breakthroughs",
+      "name": "Bloodstains & Breakthroughs",
+      "url": "https://join.cleansceneinvestigators.com/",
+      "creator": {
+        "@id": "https://christina.cleansceneinvestigators.com/#christina-hester"
+      },
+      "sameAs": [
+        "https://www.youtube.com/@BloodstainsAndBreakthroughs",
+        "https://open.spotify.com/show/0XR4BtKgxlwTFiFUbJCdS5",
+        "https://podcasts.apple.com/us/podcast/bloodstains-breakthroughs/id1874091986"
+      ]
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://cleansceneinvestigators.com/#organization",
+      "name": "CSI: Clean Scene Investigators",
+      "url": "https://cleansceneinvestigators.com/",
+      "founder": {
+        "@id": "https://christina.cleansceneinvestigators.com/#christina-hester"
+      }
+    }
+  ]
+}
