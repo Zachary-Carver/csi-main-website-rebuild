@@ -13,6 +13,37 @@
       },
       "creator": {
         "@id": "https://christina.cleansceneinvestigators.com/#christina-hester"
+      },
+      "image": "https://christina.cleansceneinvestigators.com/assets/work/bloodstains-breakthroughs-podcast.webp",
+      "potentialAction": {
+        "@type": "SubscribeAction",
+        "target": "https://join.cleansceneinvestigators.com/#join"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://join.cleansceneinvestigators.com/#webpage",
+      "url": "https://join.cleansceneinvestigators.com/",
+      "name": "Bloodstains & Breakthroughs | What Happens After Survival?",
+      "isPartOf": {
+        "@id": "https://join.cleansceneinvestigators.com/#website"
+      },
+      "about": [
+        {
+          "@id": "https://christina.cleansceneinvestigators.com/#christina-hester"
+        },
+        {
+          "@id": "https://join.cleansceneinvestigators.com/#bloodstains-breakthroughs"
+        }
+      ],
+      "creator": {
+        "@id": "https://christina.cleansceneinvestigators.com/#christina-hester"
+      },
+      "primaryImageOfPage": {
+        "@type": "ImageObject",
+        "url": "https://christina.cleansceneinvestigators.com/assets/work/bloodstains-breakthroughs-podcast.webp",
+        "width": 1600,
+        "height": 900
       }
     },
     {
@@ -20,6 +51,14 @@
       "@id": "https://christina.cleansceneinvestigators.com/#christina-hester",
       "name": "Christina Hester",
       "url": "https://christina.cleansceneinvestigators.com/",
+      "jobTitle": [
+        "Founder and CEO",
+        "Former Crime Scene Investigator",
+        "Podcast Host",
+        "Speaker",
+        "Author",
+        "Advocate"
+      ],
       "worksFor": {
         "@id": "https://cleansceneinvestigators.com/#organization"
       },
@@ -39,6 +78,10 @@
       "creator": {
         "@id": "https://christina.cleansceneinvestigators.com/#christina-hester"
       },
+      "author": {
+        "@id": "https://christina.cleansceneinvestigators.com/#christina-hester"
+      },
+      "image": "https://christina.cleansceneinvestigators.com/assets/work/bloodstains-breakthroughs-podcast.webp",
       "sameAs": [
         "https://www.youtube.com/@BloodstainsAndBreakthroughs",
         "https://open.spotify.com/show/0XR4BtKgxlwTFiFUbJCdS5",
