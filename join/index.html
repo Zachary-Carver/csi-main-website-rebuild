@@ -12,6 +12,17 @@
   <meta property="og:title" content="Bloodstains & Breakthroughs | Everybody has bloodstains.">
   <meta property="og:description" content="The bloodstain is what happened. The breakthrough is what you choose, learn, build, change, or become afterward.">
   <meta property="og:url" content="https://join.cleansceneinvestigators.com/">
+  <meta property="og:image" content="https://christina.cleansceneinvestigators.com/assets/work/bloodstains-breakthroughs-podcast.webp">
+  <meta property="og:image:secure_url" content="https://christina.cleansceneinvestigators.com/assets/work/bloodstains-breakthroughs-podcast.webp">
+  <meta property="og:image:type" content="image/webp">
+  <meta property="og:image:width" content="1600">
+  <meta property="og:image:height" content="900">
+  <meta property="og:image:alt" content="Bloodstains & Breakthroughs artwork featuring Christina Hester with a microphone">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Bloodstains & Breakthroughs | Everybody has bloodstains.">
+  <meta name="twitter:description" content="The bloodstain is what happened. The breakthrough is what you choose, learn, build, change, or become afterward.">
+  <meta name="twitter:image" content="https://christina.cleansceneinvestigators.com/assets/work/bloodstains-breakthroughs-podcast.webp">
+  <meta name="twitter:image:alt" content="Bloodstains & Breakthroughs artwork featuring Christina Hester with a microphone">
   <style>
     :root{
       --black:#080808;
@@ -178,7 +189,12 @@
         "description": "Christina Hester's platform for honest stories, practical reflection, workshops, conversations, and rebuilding after survival mode.",
         "inLanguage": "en-US",
         "publisher": { "@id": "https://christina.cleansceneinvestigators.com/#christina-hester" },
-        "creator": { "@id": "https://christina.cleansceneinvestigators.com/#christina-hester" }
+        "creator": { "@id": "https://christina.cleansceneinvestigators.com/#christina-hester" },
+        "image": "https://christina.cleansceneinvestigators.com/assets/work/bloodstains-breakthroughs-podcast.webp",
+        "potentialAction": {
+          "@type": "SubscribeAction",
+          "target": "https://join.cleansceneinvestigators.com/#join"
+        }
       },
       {
         "@type": "WebPage",
@@ -190,7 +206,13 @@
           { "@id": "https://christina.cleansceneinvestigators.com/#christina-hester" },
           { "@id": "https://join.cleansceneinvestigators.com/#bloodstains-breakthroughs" }
         ],
-        "creator": { "@id": "https://christina.cleansceneinvestigators.com/#christina-hester" }
+        "creator": { "@id": "https://christina.cleansceneinvestigators.com/#christina-hester" },
+        "primaryImageOfPage": {
+          "@type": "ImageObject",
+          "url": "https://christina.cleansceneinvestigators.com/assets/work/bloodstains-breakthroughs-podcast.webp",
+          "width": 1600,
+          "height": 900
+        }
       },
       {
         "@type": "Person",
@@ -214,6 +236,7 @@
         "url": "https://join.cleansceneinvestigators.com/",
         "creator": { "@id": "https://christina.cleansceneinvestigators.com/#christina-hester" },
         "author": { "@id": "https://christina.cleansceneinvestigators.com/#christina-hester" },
+        "image": "https://christina.cleansceneinvestigators.com/assets/work/bloodstains-breakthroughs-podcast.webp",
         "sameAs": [
           "https://www.youtube.com/@BloodstainsAndBreakthroughs",
           "https://open.spotify.com/show/0XR4BtKgxlwTFiFUbJCdS5",
@@ -454,7 +477,9 @@
             <input type="hidden" name="_subject" value="New Bloodstains & Breakthroughs Signup">
             <input type="hidden" name="_next" value="https://join.cleansceneinvestigators.com/thanks/">
             <input type="hidden" name="Traffic Source" id="traffic-source" value="Direct / unknown">
-            <input type="hidden" name="Campaign" id="campaign" value="">\n            <input type="hidden" name="UTM Medium" id="utm-medium" value="">\n            <input type="hidden" name="UTM Content" id="utm-content" value="">
+            <input type="hidden" name="Campaign" id="campaign" value="">
+            <input type="hidden" name="UTM Medium" id="utm-medium" value="">
+            <input type="hidden" name="UTM Content" id="utm-content" value="">
             <input type="hidden" name="Referrer" id="referrer" value="">
             <input type="hidden" name="Landing URL" id="landing-url" value="">
             <input class="honeypot" type="text" name="_honey" tabindex="-1" autocomplete="off">
@@ -521,6 +546,7 @@
         <a href="https://www.facebook.com/christinakhester" target="_blank" rel="noopener">Facebook</a>
         <a href="https://www.linkedin.com/in/christina-hester-676b38223/" target="_blank" rel="noopener">LinkedIn</a>
         <a href="https://cleansceneinvestigators.com/privacy-policy/" target="_blank" rel="noopener">Privacy</a>
+        <a href="/unsubscribe/">Unsubscribe</a>
       </div>
     </div>
   </footer>
@@ -529,11 +555,25 @@
     (function(){
       var params=new URLSearchParams(window.location.search);
       var source=params.get('utm_source')||params.get('source')||params.get('src')||'Direct / unknown';
-      var campaign=params.get('utm_campaign')||'';\n      var medium=params.get('utm_medium')||'';\n      var content=params.get('utm_content')||'';
+      var campaign=params.get('utm_campaign')||'';
+      var medium=params.get('utm_medium')||'';
+      var content=params.get('utm_content')||'';
       document.getElementById('traffic-source').value=source;
-      document.getElementById('campaign').value=campaign;\n      document.getElementById('utm-medium').value=medium;\n      document.getElementById('utm-content').value=content;
+      document.getElementById('campaign').value=campaign;
+      document.getElementById('utm-medium').value=medium;
+      document.getElementById('utm-content').value=content;
       document.getElementById('referrer').value=document.referrer||'Direct';
-      document.getElementById('landing-url').value=window.location.href;\n\n      var form=document.getElementById('signup-form');\n      form.addEventListener('submit',function(){\n        try{\n          sessionStorage.setItem('bb_signup_email',form.querySelector('[name="email"]').value||'');\n          sessionStorage.setItem('bb_signup_name',form.querySelector('[name="First Name"]').value||'');\n          sessionStorage.setItem('bb_signup_source',source);\n          sessionStorage.setItem('bb_signup_campaign',campaign);\n        }catch(e){}\n      });
+      document.getElementById('landing-url').value=window.location.href;
+
+      var form=document.getElementById('signup-form');
+      form.addEventListener('submit',function(){
+        try{
+          sessionStorage.setItem('bb_signup_email',form.querySelector('[name="email"]').value||'');
+          sessionStorage.setItem('bb_signup_name',form.querySelector('[name="First Name"]').value||'');
+          sessionStorage.setItem('bb_signup_source',source);
+          sessionStorage.setItem('bb_signup_campaign',campaign);
+        }catch(e){}
+      });
     }());
   </script>
 </body>
