@@ -133,7 +133,10 @@
         <form class="pulse-card" action="https://formsubmit.co/christina@cleansceneinvestigators.com" method="POST">
           <input type="hidden" name="_subject" value="Bloodstains & Breakthroughs Interest Pulse">
           <input type="hidden" name="_next" value="https://join.cleansceneinvestigators.com/thanks/?pulse=thanks">
-          <input type="hidden" name="Source" value="Post-signup thank-you page">\n          <input type="hidden" name="Subscriber Email" id="pulse-email" value="">\n          <input type="hidden" name="Original Traffic Source" id="pulse-source" value="">\n          <input type="hidden" name="Original Campaign" id="pulse-campaign" value="">
+          <input type="hidden" name="Source" value="Post-signup thank-you page">
+          <input type="hidden" name="Subscriber Email" id="pulse-email" value="">
+          <input type="hidden" name="Original Traffic Source" id="pulse-source" value="">
+          <input type="hidden" name="Original Campaign" id="pulse-campaign" value="">
           <label for="need">Choose one</label>
           <select id="need" name="What would help most right now?" required>
             <option value="">Select an answer</option>
@@ -205,12 +208,17 @@
   </main>
 
   <footer>
-    © 2026 Bloodstains &amp; Breakthroughs · Created by Christina Hester
+    © 2026 Bloodstains &amp; Breakthroughs · Created by Christina Hester · <a href="/unsubscribe/">Unsubscribe</a>
   </footer>
 
   <script>
     (function(){
-      var shareUrl='https://join.cleansceneinvestigators.com/';\n      try{\n        document.getElementById('pulse-email').value=sessionStorage.getItem('bb_signup_email')||'';\n        document.getElementById('pulse-source').value=sessionStorage.getItem('bb_signup_source')||'';\n        document.getElementById('pulse-campaign').value=sessionStorage.getItem('bb_signup_campaign')||'';\n      }catch(e){}
+      var shareUrl='https://join.cleansceneinvestigators.com/';
+      try{
+        document.getElementById('pulse-email').value=sessionStorage.getItem('bb_signup_email')||'';
+        document.getElementById('pulse-source').value=sessionStorage.getItem('bb_signup_source')||'';
+        document.getElementById('pulse-campaign').value=sessionStorage.getItem('bb_signup_campaign')||'';
+      }catch(e){}
       var status=document.getElementById('copy-status');
       var shareBtn=document.getElementById('share-btn');
       var copyBtn=document.getElementById('copy-btn');
