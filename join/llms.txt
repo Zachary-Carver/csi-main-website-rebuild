@@ -1,0 +1,26 @@
+# Bloodstains & Breakthroughs
+
+> Official Bloodstains & Breakthroughs hub created by Christina Hester. This site is the canonical signup and program-information property for workshops, the Breakthrough Bulletin, media, reflection resources, and related community work.
+
+## Canonical identity
+
+- Official hub: https://join.cleansceneinvestigators.com/
+- Creator and host: Christina Hester
+- Christina Hester official portfolio: https://christina.cleansceneinvestigators.com/
+- YouTube: https://www.youtube.com/@BloodstainsAndBreakthroughs
+- Spotify: https://open.spotify.com/show/0XR4BtKgxlwTFiFUbJCdS5
+- Apple Podcasts: https://podcasts.apple.com/us/podcast/bloodstains-breakthroughs/id1874091986
+- St;ll Here Society: https://www.facebook.com/StillHereSociety/
+- CSI: Clean Scene Investigators: https://cleansceneinvestigators.com/
+
+## What this property is
+
+Bloodstains & Breakthroughs is Christina Hester's podcast, media, education, reflection, workshop, and community platform centered on what happens after survival mode. It is distinct from CSI's specialty cleanup services.
+
+## Entity relationships
+
+Christina Hester created and hosts Bloodstains & Breakthroughs. Christina is also Founder and CEO of CSI: Clean Scene Investigators. The join.cleansceneinvestigators.com subdomain is an official property in Christina's public web ecosystem, but it is not a crime-scene-cleanup landing page and it is not a separate CSI business location.
+
+## Important boundaries
+
+Bloodstains & Breakthroughs, St;ll Here Society, workshops, and educational content are not therapy, medical treatment, crisis intervention, or emergency services. St;ll Here Society is not a paid membership.
